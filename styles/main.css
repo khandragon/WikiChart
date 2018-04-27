@@ -1,3 +1,7 @@
+a{
+    text-decoration: none;
+    color:black;
+}
 .tab {
 	overflow: hidden;
     background-color: #f1f1f1;
@@ -5,11 +9,7 @@
 
 /* Style the buttons inside the tab */
 .tab a {
-    background-color: inherit;
     float: left;
-    border: none;
-    outline: none;
-    cursor: pointer;
     padding: 14px 16px;
     transition: 0.3s;
     font-size: 17px;
@@ -17,18 +17,19 @@
 
 /* Change background color of buttons on hover */
 .tab a:hover {
-    background-color:red;
+    background-color: #c5c2c2;
 }
 
-/* Create an active/current tablink class */
-.tab a.active {
-    background-color: blue;
-}
 
 /* Style the tab content */
 .tabcontent {
     display: none;
     padding: 6px 12px;
-    border: 1px solid green;
     border-top: none;
+}
+
+section{
+    padding: 1%;
+    background-color: #f1f1f1;
+
 }

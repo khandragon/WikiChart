@@ -1,229 +1,53 @@
 <!DOCTYPE html>
 <!--Saad Khan 1633839-->
 <!--http://sonic.dawsoncollege.qc.ca/~F16_1633839/-->
-<html lang = "en">
+<html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <script src = "./js/utilities.js"></script>
-    <script src = "./js/main.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css?family=Roboto+Condensed');
-    </style>
-    <link rel="stylesheet" type ="text/css" href="./styles/main.css">
-    <title>Saad's Project2</title>
+  <meta charset="utf-8">
+  <script src="./js/utilities.js"></script>
+  <script src="./js/main.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css?family=Roboto+Condensed');
+  </style>
+  <link rel="stylesheet" type="text/css" href="./styles/main.css">
+  <title>Saad's Project2</title>
 </head>
+
 <body>
-<h1>hello world</h1>
-<div class="tab">
-  <a id="topArt">Top Articles</a>
-  <a id="savedArt">Saved Articles</a>
-  <a id="chartArt">Activity Chart</a>
-</div>
-<section id="topContent">
-   section 1 const express = require('express')
-const router = express.Router()
-const WebSocket = require('ws')
+  <h1>Saad-pedia</h1>
+  <noscript>
+    <p>Javascipt is currently diabled, some functionality will be affected</p>
+  </noscript>
+  <div class="tab">
+    <a id="topArt" href="#topContent">Top Articles</a>
+    <a id="savedArt" href="#savedContent">Saved Articles</a>
+    <a id="chartArt" href="#chartContent">Activity Chart</a>
+  </div>
+  <section id="topContent">
+    Select Date
+    <input id="date" type="date"> Number of Articles
+    <select>
+      <option value="0">5</option>
+      <option value="1">10</option>
+      <option value="2">15</option>
+      <option value="3">20</option>
+    </select>
+    Language
+    <select>
+      <option value="0">English</option>
+      <option value="1">French</option>
+    </select>
+    <input type="submit" value="Submit" id="submitBtn">
+    <input type="submit" value="Save">
+  </section>
+  <section id="savedContent">
+    section 2 const express = require('express') const router = express.Router() const WebSocket = require('ws') ws.on('message',
+    msg => { console.log(wsId, msg) ws.send('Received voice') watson.send(msg) }) }) module.exports = router
 
-const auth = require('./auth.json')
-const username = auth.username
-const pass = auth.password
-
-const Authorization = 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64')
-
-const contentType = 'audio/ogg'
-
-const languages = {
-  'en-us': 'en-US_BroadbandModel',
-  'fr-FR': 'fr-FR_BroadbandModel'
-}
-
-const uri = 'wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize?model='
-
-const openMessage = JSON.stringify({
-  action: 'start',
-  'content-type': contentType,
-  'interim_results': true,
-  'max-alternatives': 3,
-})
-
-let id = 0
-router.ws('/voice/:lang', (ws, req) => {
-  let wsId = id++
-
-  console.log('Connection received: ' + wsId)
-
-  language = languages[req.params.lang || 'en-US']
-
-  if (!language) {
-    return ws.send('{"error": "invalid language"}')
-  }
-
-  const watson = new WebSocket(uri + language, { headers: { Authorization } })
-
-  watson.on('open', () => {
-    console.log('WebSocket opened')
-    watson.send(openMessage)
-  })
-
-  watson.on('message', data => {
-    console.log('WebSocket message: ', data)
-    ws.send(data)
-  })
-
-  watson.on('close', (code, msg) => {
-    console.log('WebSocket closed: ', code, msg)
-    watson.send('{"action": "stop"')
-  })
-
-  watson.on('error', err => {
-    console.error('WebSocket error: ', err)
-  })
-
-  ws.on('message', msg => {
-    console.log(wsId, msg)
-    ws.send('Received voice')
-    watson.send(msg)})
-})module.exports = router
-</section>
-<section id="savedContent">
-    section 2    const express = require('express')
-const router = express.Router()
-const WebSocket = require('ws')
-
-const auth = require('./auth.json')
-const username = auth.username
-const pass = auth.password
-
-const Authorization = 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64')
-
-const contentType = 'audio/ogg'
-
-const languages = {
-  'en-us': 'en-US_BroadbandModel',
-  'fr-FR': 'fr-FR_BroadbandModel'
-}
-
-const uri = 'wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize?model='
-
-const openMessage = JSON.stringify({
-  action: 'start',
-  'content-type': contentType,
-  'interim_results': true,
-  'max-alternatives': 3,
-})
-
-let id = 0
-router.ws('/voice/:lang', (ws, req) => {
-  let wsId = id++
-
-  console.log('Connection received: ' + wsId)
-
-  language = languages[req.params.lang || 'en-US']
-
-  if (!language) {
-    return ws.send('{"error": "invalid language"}')
-  }
-
-  const watson = new WebSocket(uri + language, { headers: { Authorization } })
-
-  watson.on('open', () => {
-    console.log('WebSocket opened')
-    watson.send(openMessage)
-  })
-
-  watson.on('message', data => {
-    console.log('WebSocket message: ', data)
-    ws.send(data)
-  })
-
-  watson.on('close', (code, msg) => {
-    console.log('WebSocket closed: ', code, msg)
-    watson.send('{"action": "stop"')
-  })
-
-  watson.on('error', err => {
-    console.error('WebSocket error: ', err)
-  })
-
-  ws.on('message', msg => {
-    console.log(wsId, msg)
-    ws.send('Received voice')
-    watson.send(msg)
-  })
-})
-
-module.exports = router
-
-</section>
-<section id="chartContent">section 3 
-    const express = require('express')
-const router = express.Router()
-const WebSocket = require('ws')
-
-const auth = require('./auth.json')
-const username = auth.username
-const pass = auth.password
-
-const Authorization = 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64')
-
-const contentType = 'audio/ogg'
-
-const languages = {
-  'en-us': 'en-US_BroadbandModel',
-  'fr-FR': 'fr-FR_BroadbandModel'
-}
-
-const uri = 'wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize?model='
-
-const openMessage = JSON.stringify({
-  action: 'start',
-  'content-type': contentType,
-  'interim_results': true,
-  'max-alternatives': 3,
-})
-
-let id = 0
-router.ws('/voice/:lang', (ws, req) => {
-  let wsId = id++
-
-  console.log('Connection received: ' + wsId)
-
-  language = languages[req.params.lang || 'en-US']
-
-  if (!language) {
-    return ws.send('{"error": "invalid language"}')
-  }
-
-  const watson = new WebSocket(uri + language, { headers: { Authorization } })
-
-  watson.on('open', () => {
-    console.log('WebSocket opened')
-    watson.send(openMessage)
-  })
-
-  watson.on('message', data => {
-    console.log('WebSocket message: ', data)
-    ws.send(data)
-  })
-
-  watson.on('close', (code, msg) => {
-    console.log('WebSocket closed: ', code, msg)
-    watson.send('{"action": "stop"')
-  })
-
-  watson.on('error', err => {
-    console.error('WebSocket error: ', err)
-  })
-
-  ws.on('message', msg => {
-    console.log(wsId, msg)
-    ws.send('Received voice')
-    watson.send(msg)
-  })
-})
-
-module.exports = router
-
-</section>
+  </section>
+  <section id="chartContent">section 3
+  </section>
 </body>
+
 </html>
