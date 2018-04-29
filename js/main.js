@@ -1,4 +1,5 @@
 "use strict";
+var g = {};
 /**
  * createDummyElements - creates sematic elements which are not supported by IE8
  *
@@ -11,16 +12,6 @@ function createDummyElements() {
     for (var i = 0; i < semanticElements.length; i++) {
         document.createElement(semanticElements[i]);
     }
-}
-function main() {
-    console.log("start");
-    //noScrollJumping();
-    invisbleAll();
-    selectedTop();
-    U.addHandler(U.$("topArt"), "click", selectedTop);
-    U.addHandler(U.$("savedArt"), "click", selectedSaved);
-    U.addHandler(U.$("chartArt"), "click", selectedChart);
-    U.addHandler(U.$("submitBtn"), "click", submitData);
 }
 function selectedTop() {
     invisbleAll();
@@ -50,7 +41,7 @@ if (!document.addEventListener) {
 }
 function dateIsValid(testDate) {
     var date_regex = /^(19|20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|1\d|2\d|3[01])$/;
-    if (!(date_regex.test(testDate))) {
+    if ((!date_regex.test(testDate)) || g.currentDate <= new Date(testDate)) {
         return false;
     }
     else
@@ -59,12 +50,61 @@ function dateIsValid(testDate) {
 function submitData() {
     var date = U.$("date").value;
     if (dateIsValid(date)) {
-        U.$("date").style.color="black";
+        U.$("date").style.color = "black";
         var numArt = U.$("numArt");
-        var language = U.$("langSelect");
+        var language = U.$("langSelect").value;
+        readFile("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2], numArt);
     }
     else {
-        U.$("date").style.color="red";
+        console.log("change to red");
+
+        U.$("date").style.color = "red";
     }
+}
+function processText(responseText) {
+        console.log("hello"+responseText);
+        console.log(responseText.value);
+        //var articles = responseText.split("article")
+        //console.log(articles);
+        
+    }
+function readFile(url, numArt) {
+    console.log(url);
+    var r = new XMLHttpRequest();
+    r.open("GET", url, true);
+    r.setRequestHeader("Api-User-Agent", "saaadkhan23@yahoo.ca");
+    console.log("set the request header");
+    r.onreadystatechange = function () {
+        if(r.readyState === 4) {            
+          processText(r.responseText);
+        }
+      };
+    r.send(null);
+}
+function defaultSearch() {
+    console.log("default search");
+    if (dateIsValid(g.yesturday)) {
+        var date = dateToString(g.yesturday);
+        U.$("date").value = date;
+        var numArt = U.$("numArt");
+        var language = U.$("langSelect").value;
+        readFile("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2], numArt);
+    }
+}
+function dateToString(date) {
+    return new Date(date).toISOString().slice(0, 10);
+}
+function main() {
+    console.log("start");
+    var currentDate = new Date();
+    g.yesturday = dateToString(new Date(currentDate.setDate(currentDate.getDate() - 1)));
+    defaultSearch();
+    //noScrollJumping();
+    invisbleAll();
+    selectedTop();
+    U.addHandler(U.$("topArt"), "click", selectedTop);
+    U.addHandler(U.$("savedArt"), "click", selectedSaved);
+    U.addHandler(U.$("chartArt"), "click", selectedChart);
+    U.addHandler(U.$("submitBtn"), "click", submitData);
 }
 U.ready(main);
