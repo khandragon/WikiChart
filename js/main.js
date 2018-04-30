@@ -13,6 +13,13 @@ function createDummyElements() {
         document.createElement(semanticElements[i]);
     }
 }
+function checkmarkGen(title) {
+    var checkbox = document.createElement('input');
+    checkbox.type = "checkbox";
+    checkbox.value = title;
+    checkbox.id = title;
+    return checkbox;
+}
 function selectedTop() {
     invisbleAll();
     U.$("topContent").style.display = "block";
@@ -55,7 +62,6 @@ function processTitles(responseText) {
     result.appendChild(summarynode);
     target.appendChild(result);
 }
-
 function readTitle(url) {
     var r = new XMLHttpRequest();
     r.open("GET", url, true);
@@ -79,13 +85,14 @@ function populateIndex(titles, numViews) {
         var resultnode = document.createElement("div");
         var titleContainer = document.createElement("p");
         var viewContainer = document.createElement("p");
-        var titlenode = document.createTextNode((i + 1) + ": " + titles[i].replace(/_/g," "));
+        var titlenode = document.createTextNode((i + 1) + ": " + titles[i].replace(/_/g, " "));
         var viewnode = document.createTextNode("  Number of Views: " + numViews[i]);
         titleContainer.appendChild(titlenode);
         viewContainer.appendChild(viewnode);
         resultnode.appendChild(titleContainer);
         resultnode.appendChild(viewContainer);
         resultnode.id = titles[i];
+        resultnode.appendChild(checkmarkGen(titles[i]));
         results.appendChild(resultnode);
     }
     console.log("done");
@@ -153,13 +160,13 @@ function defaultSearch() {
 }
 function pad(number) {
     var r = String(number);
-    if ( r.length === 1 ) {
+    if (r.length === 1) {
         r = '0' + r;
     }
     return r;
-} 
+}
 function dateToString(date) {
-    return date.getUTCFullYear() + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate());    
+    return date.getUTCFullYear() + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate());
 }
 
 function main() {
