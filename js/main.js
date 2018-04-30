@@ -49,15 +49,15 @@ function processTitles(responseText) {
     var imgContainer = document.createElement("div");
     var summarynode = document.createTextNode(pageInfo.extract);
     var target = U.$(pageInfo.titles.canonical);
-    if(pageInfo.thumbnail !== undefined){
+    if (pageInfo.thumbnail !== undefined) {
         var img = document.createElement("img");
-        img.src=pageInfo.thumbnail.source;
+        img.src = pageInfo.thumbnail.source;
         imgContainer.appendChild(img);
         result.appendChild(imgContainer);
     }
     result.appendChild(summarynode);
     target.appendChild(result);
-}    
+}
 
 function readTitle(url) {
     var r = new XMLHttpRequest();
@@ -81,10 +81,14 @@ function populateIndex(titles, numViews) {
     var results = U.$("results");
     for (let i = 0; i < titles.length; i++) {
         var resultnode = document.createElement("div");
+        var titleContainer = document.createElement("p");
+        var viewContainer = document.createElement("p");
         var titlenode = document.createTextNode((i + 1) + ": " + titles[i]);
-        var viewnode = document.createTextNode("\br\n   Number of Views: " + numViews[i])
-        resultnode.appendChild(titlenode);
-        resultnode.appendChild(viewnode);
+        var viewnode = document.createTextNode("  Number of Views: " + numViews[i])
+        titleContainer.appendChild(titlenode);
+        viewContainer.appendChild(viewnode);
+        resultnode.appendChild(titleContainer);
+        resultnode.appendChild(viewContainer);
         resultnode.id = titles[i];
         results.appendChild(resultnode);
     }
@@ -119,7 +123,7 @@ function processText(responseText) {
     var topViewed = [];
     var numViews = [];
     for (var i = 0; i < numArt; i++) {
-        if (text.items[0].articles[i].article !== "Main_Page" && text.items[0].articles[i].article.indexOf("Special") === -1) {
+        if (text.items[0].articles[i].article !== "Main_Page" && text.items[0].articles[i].article.indexOf("Accueil_principal") === -1 &&  text.items[0].articles[i].article.indexOf("Special") === -1 && text.items[0].articles[i].article.indexOf("Spécial")&&text.items[0].articles[i].article.indexOf("Sp?cial")) {
             topViewed[i] = text.items[0].articles[i].article;
             numViews[i] = text.items[0].articles[i].views;
         }
@@ -138,12 +142,11 @@ function readFile(url, numArt) {
     r.open("GET", url, true);
     r.setRequestHeader("Api-User-Agent", "saaadkhan23@yahoo.ca");
     console.log("set the request header");
-    U.addHandler(r, "load",
-    /*r.onreadystatechange*/  function () {
-            if (r.readyState === 4) {
-                processText(r.responseText);
-            }
-        });
+    U.addHandler(r, "load", function () {
+        if (r.readyState === 4) {
+            processText(r.responseText);
+        }
+    });
     r.send(null);
 }
 function defaultSearch() {
