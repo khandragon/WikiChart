@@ -15,18 +15,15 @@ function createDummyElements() {
 }
 function selectedTop() {
     invisbleAll();
-    console.log("top");
     U.$("topContent").style.display = "block";
     U.$("topContent").style.backgroundcolor = "grey";
 
 }
 function selectedSaved() {
-    console.log("saved");
     invisbleAll();
     U.$("savedContent").style.display = "block";
 }
 function selectedChart() {
-    console.log("chart");
     invisbleAll();
     U.$("chartContent").style.display = "block";
 }
@@ -63,7 +60,6 @@ function readTitle(url) {
     var r = new XMLHttpRequest();
     r.open("GET", url, true);
     r.setRequestHeader("Api-User-Agent", "saaadkhan23@yahoo.ca");
-    console.log("set the request header");
     U.addHandler(r, "load", function () {
         if (r.readyState === 4) {
             processTitles(r.responseText);
@@ -79,12 +75,12 @@ function getExtractPictures(titles) {
 }
 function populateIndex(titles, numViews) {
     var results = U.$("results");
-    for (let i = 0; i < titles.length; i++) {
+    for (var i = 0; i < titles.length; i++) {
         var resultnode = document.createElement("div");
         var titleContainer = document.createElement("p");
         var viewContainer = document.createElement("p");
-        var titlenode = document.createTextNode((i + 1) + ": " + titles[i]);
-        var viewnode = document.createTextNode("  Number of Views: " + numViews[i])
+        var titlenode = document.createTextNode((i + 1) + ": " + titles[i].replace(/_/g," "));
+        var viewnode = document.createTextNode("  Number of Views: " + numViews[i]);
         titleContainer.appendChild(titlenode);
         viewContainer.appendChild(viewnode);
         resultnode.appendChild(titleContainer);
@@ -113,7 +109,6 @@ function submitData() {
     }
     else {
         console.log("change to red");
-
         U.$("date").style.color = "red";
     }
 }
@@ -123,7 +118,7 @@ function processText(responseText) {
     var topViewed = [];
     var numViews = [];
     for (var i = 0; i < numArt; i++) {
-        if (text.items[0].articles[i].article !== "Main_Page" && text.items[0].articles[i].article.indexOf("Accueil_principal") === -1 &&  text.items[0].articles[i].article.indexOf("Special") === -1 && text.items[0].articles[i].article.indexOf("Spécial")&&text.items[0].articles[i].article.indexOf("Sp?cial")) {
+        if (text.items[0].articles[i].article !== "Main_Page" && text.items[0].articles[i].article.indexOf("Accueil_principal") === -1 && text.items[0].articles[i].article.indexOf("Special") === -1 && text.items[0].articles[i].article.indexOf("Spécial") && text.items[0].articles[i].article.indexOf("Sp?cial")) {
             topViewed[i] = text.items[0].articles[i].article;
             numViews[i] = text.items[0].articles[i].views;
         }
@@ -137,11 +132,9 @@ function processText(responseText) {
     getExtractPictures(topViewed);
 }
 function readFile(url, numArt) {
-    console.log(url);
     var r = new XMLHttpRequest();
     r.open("GET", url, true);
     r.setRequestHeader("Api-User-Agent", "saaadkhan23@yahoo.ca");
-    console.log("set the request header");
     U.addHandler(r, "load", function () {
         if (r.readyState === 4) {
             processText(r.responseText);
@@ -151,20 +144,28 @@ function readFile(url, numArt) {
 }
 function defaultSearch() {
     console.log("default search");
-    if (dateIsValid(g.yesturday)) {
-        var date = dateToString(g.yesturday);
+    var date = dateToString(g.yesturday);
+    if (dateIsValid(date)) {
         U.$("date").value = date;
         var language = U.$("langSelect").value;
         readFile("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2], numArt);
     }
 }
+function pad(number) {
+    var r = String(number);
+    if ( r.length === 1 ) {
+        r = '0' + r;
+    }
+    return r;
+} 
 function dateToString(date) {
-    return new Date(date).toISOString().slice(0, 10);
+    return date.getUTCFullYear() + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate());    
 }
+
 function main() {
     console.log("start");
     var currentDate = new Date();
-    g.yesturday = dateToString(new Date(currentDate.setDate(currentDate.getDate() - 2)));
+    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 1));
     defaultSearch();
     //noScrollJumping();
     invisbleAll();
