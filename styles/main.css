@@ -1,3 +1,7 @@
+article,aside,details,figcaption,figure,
+footer,header,hgroup,menu,nav,section {
+   display:block;
+}
 a{
     text-decoration: none;
     color:black;
@@ -31,5 +35,10 @@ a{
 section{
     padding: 1%;
     background-color: #f1f1f1;
+}
 
+#results{
+    padding: 2%;
+    margin: 1%;
+    background-color: white;
 }
