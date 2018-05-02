@@ -13,25 +13,104 @@ function createDummyElements() {
         document.createElement(semanticElements[i]);
     }
 }
-function checkmarkGen(title) {
+if (!document.addEventListener) {
+    createDummyElements();
+}
+function removeSaved() {
+   console.log("removing"); 
+    var data = U.$("mySaved");
+    data.innerHTML = '';    
+}
+function checkmarkGen(title,isChecked) {
     var checkbox = document.createElement('input');
     checkbox.type = "checkbox";
     checkbox.value = title;
     checkbox.id = title;
+    checkbox.checked=isChecked;
     return checkbox;
 }
 function selectedTop() {
     invisbleAll();
+    removeSaved();
     U.$("topContent").style.display = "block";
     U.$("topContent").style.backgroundcolor = "grey";
 
 }
+function populateSave(link,title,imgSrc,extract) {
+    var results = U.$("mySaved");
+    var resultnode = document.createElement("div");
+    var titleContainer = document.createElement("p");
+    var anchor = document.createElement("a");
+    var viewContainer = document.createElement("p");
+    var titlenode = document.createTextNode(title);
+    anchor.setAttribute("href",link);
+    anchor.appendChild(titlenode);
+    titleContainer.appendChild(anchor);
+    resultnode.appendChild(titleContainer);
+    resultnode.appendChild(viewContainer);
+    resultnode.id = title.replace(/ /g,"_");
+    resultnode.appendChild(checkmarkGen(resultnode.id,true));
+    results.appendChild(resultnode);
+    var text = document.createElement("p");
+    var imgContainer = document.createElement("div");
+    var summarynode = document.createTextNode(extract);
+    if (imgSrc!== null) {
+        var img = document.createElement("img");
+        img.src = imgSrc;
+        imgContainer.appendChild(img);
+        text.appendChild(imgContainer);
+    }
+    text.appendChild(summarynode);
+    results.appendChild(text);
+}
 function selectedSaved() {
     invisbleAll();
+    removeSaved();
     U.$("savedContent").style.display = "block";
+    var parser;
+    var xmlDoc;
+    var text = JSON.parse(localStorage.getItem("savedList"));
+
+    for (var i = 0; i < text.length; i++) {
+        if (window.DOMParser) {
+            parser = new DOMParser();
+            xmlDoc = parser.parseFromString(text[i], "text/html");
+        } else {
+            xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+            xmlDoc.async = false;
+            xmlDoc.loadXML(text[i]);
+        }
+        var link = xmlDoc.getElementsByTagName("a")[0].href;
+        var title = xmlDoc.getElementsByTagName("a")[0].innerText;
+        var img = xmlDoc.getElementsByTagName("img")[0].src;
+        var extract = xmlDoc.getElementsByTagName("div")[0].nextSibling.textContent;
+        populateSave(link,title,img,extract)
+    }
+}
+function notRepeat(data,resultHTML) {
+    var isRepeat
+    for (let i = 0; i < data.length; i++) {
+        if (data[i] === resultHTML)
+        return false
+    }
+    return true;
+}
+function savedData() {
+    console.log("saving");
+    var results = U.$("results");
+    var data = JSON.parse(localStorage.getItem("savedList"));
+    console.log(data);
+    
+    for (var i = 0; i < results.childNodes.length; i++) {
+        if (results.childNodes[i].childNodes[2].checked && notRepeat(data, results.childNodes[i].innerHTML)) {
+            data.push(results.childNodes[i].innerHTML);
+        }
+    }
+    localStorage.setItem("savedList", JSON.stringify(data));
 }
 function selectedChart() {
     invisbleAll();
+    removeSaved();
     U.$("chartContent").style.display = "block";
 }
 function invisbleAll() {
@@ -40,11 +119,8 @@ function invisbleAll() {
         allContent[i].style.display = "none";
     }
 }
-if (!document.addEventListener) {
-    createDummyElements();
-}
 function removeData() {
-    var data = U.$("results");
+    var data = U.$("mySaved");
     data.innerHTML = '';
 }
 function processTitles(responseText) {
@@ -96,7 +172,7 @@ function populateIndex(titles, numViews) {
         resultnode.appendChild(titleContainer);
         resultnode.appendChild(viewContainer);
         resultnode.id = titles[i];
-        resultnode.appendChild(checkmarkGen(titles[i]));
+        resultnode.appendChild(checkmarkGen(titles[i],false));
         results.appendChild(resultnode);
     }
     console.log("done");
@@ -183,20 +259,9 @@ function defaultStore() {
     var data = [];
     localStorage.setItem("savedList", JSON.stringify(data));
 }
-function savedData() {
-    console.log("saving");
-    var results = U.$("results");
-    //var checked = [];
-    var data = JSON.parse(localStorage.getItem("savedList"));
-    for (var i = 0; i < results.childNodes.length; i++) {
-        if (results.childNodes[i].childNodes[2].checked) {
-            data.push(results.childNodes[i].innerHTML);
-        }
-    }
-    console.log(JSON.parse(JSON.stringify(data)));
-    localStorage.setItem("savedList", JSON.stringify(data));
-}
+function noScrollJumping() {
 
+}
 function main() {
     console.log("start");
     var currentDate = new Date();
@@ -204,7 +269,7 @@ function main() {
     g.minDate = new Date();
     defaultStore();
     defaultSearch();
-    //noScrollJumping();
+    noScrollJumping();
     invisbleAll();
     selectedTop();
     U.addHandler(U.$("topArt"), "click", selectedTop);
