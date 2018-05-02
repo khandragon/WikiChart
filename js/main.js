@@ -103,7 +103,7 @@ function populateIndex(titles, numViews) {
 }
 function dateIsValid(testDate) {
     var date_regex = /^(19|20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|1\d|2\d|3[01])$/;
-    if ((!date_regex.test(testDate)) || g.currentDate <= new Date(testDate)||g.minDate<0) {
+    if ((!date_regex.test(testDate)) || g.currentDate <= new Date(testDate) || g.minDate < 0) {
         return false;
     }
     else
@@ -131,7 +131,7 @@ function processText(responseText) {
 
     for (var i = 0; i < numArt; i++) {
         if (
-            text.items[0].articles[i].article.indexOf("Main_Page")=== -1 &&
+            text.items[0].articles[i].article.indexOf("Main_Page") === -1 &&
             text.items[0].articles[i].article.indexOf("Accueil_principal") === -1 &&
             text.items[0].articles[i].article.indexOf(".php") === -1 &&
             text.items[0].articles[i].article.indexOf("Special") === -1 &&
@@ -181,23 +181,20 @@ function dateToString(date) {
 }
 function defaultStore() {
     var data = [];
-    localStorage.setItem("savedList",JSON.stringify(data));
+    localStorage.setItem("savedList", JSON.stringify(data));
 }
 function savedData() {
     console.log("saving");
     var results = U.$("results");
-    var checked = [];
-    
+    //var checked = [];
+    var data = JSON.parse(localStorage.getItem("savedList"));
     for (var i = 0; i < results.childNodes.length; i++) {
         if (results.childNodes[i].childNodes[2].checked) {
-            checked[i] = results.childNodes[i];
+            data.push(results.childNodes[i].innerHTML);
         }
     }
-    var data = JSON.parse(localStorage.getItem("savedList"));
-    data.push(checked);
-    console.log(data);
-    
-    localStorage.setItem("savedList",JSON.stringify(data));
+    console.log(JSON.parse(JSON.stringify(data)));
+    localStorage.setItem("savedList", JSON.stringify(data));
 }
 
 function main() {
@@ -215,5 +212,5 @@ function main() {
     U.addHandler(U.$("chartArt"), "click", selectedChart);
     U.addHandler(U.$("submitBtn"), "click", submitData);
     U.addHandler(U.$("saveBtn"), "click", savedData);
-}   
+}
 U.ready(main);
