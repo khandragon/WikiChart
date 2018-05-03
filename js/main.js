@@ -223,15 +223,7 @@ function dateIsValid(testDate) {
         return true;
 }
 function checkcookies(submitDate) {
-    var cookies = document.cookie.split(";");
-    var listCookies = [];
-    for (var i = 0; i < cookies.length; i++) {
-        listCookies[i] = cookies[i].split("=");
-        if (listCookies[i][0] !== submitDate) {
-            return true;
-        }
-    }
-    return false;
+   
 }
 function retainFromCache(date) {
     var cookies = document.cookie.split(";");
@@ -250,12 +242,13 @@ function submitData() {
     console.log("submitting");
     var date = U.$("date").value;
     if (dateIsValid(date)) {
-        U.$("date").style.color = "black";
+        U.$("date").style.borderColor = "black";
+        var url =("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2]);
         var numArt = U.$("numArt");
         var language = U.$("langSelect").value;
-        if (checkcookies(date)) {
+        if (checkcookies(url)) {
             console.log("api");
-            readFile("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2], numArt);
+            readFile(url,numArt);
         }
         else {
             retainFromCache(date);
@@ -284,12 +277,11 @@ function processText(responseText,url) {
         else {
             numArt++;
         }
-    }
-    console.log(topViewed);
-    
-   // localStorage.setItem()
+    }    
     topViewed = topViewed.filter(String);
     numViews = numViews.filter(String);
+    localStorage.setItem(url,JSON.stringify(topViewed));
+
     populateIndex(topViewed, numViews);
     getExtractPictures(topViewed);
 }
@@ -299,7 +291,7 @@ function readFile(url, numArt) {
     r.setRequestHeader("Api-User-Agent", "saaadkhan23@yahoo.ca");
     U.addHandler(r, "load", function () {
         if (r.readyState === 4) {
-            processText(r.responseText);
+            processText(r.responseText,url);
         }
     });
     r.send(null);
