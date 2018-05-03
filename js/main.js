@@ -18,7 +18,9 @@ if (!document.addEventListener) {
 }
 function removeSaved() {
     var data = U.$("mySaved");
-    data.innerHTML = '';
+    while (data.firstChild) {
+        data.removeChild(data.firstChild);
+    }
 }
 function removefromsaved() {
     var data = JSON.parse(localStorage.getItem("savedList"));
@@ -45,6 +47,8 @@ function selectedTop() {
 }
 function parseText(text) {
     for (var i = 0; i < text.length; i++) {
+        var parser;
+        var xmlDoc;
         if (window.DOMParser) {
             parser = new DOMParser();
             xmlDoc = parser.parseFromString(text[i], "text/html");
@@ -98,8 +102,6 @@ function selectedSaved() {
     invisbleAll();
     removeSaved();
     U.$("savedContent").style.display = "block";
-    var parser;
-    var xmlDoc;
     var text = JSON.parse(localStorage.getItem("savedList"));
     parseText(text);
 }
@@ -133,7 +135,9 @@ function invisbleAll() {
 }
 function removeData() {
     var data = U.$("results");
-    data.innerHTML = '';
+    while (data.firstChild) {
+        data.removeChild(data.firstChild);
+    }
 }
 function processTitles(responseText) {
     var pageInfo = JSON.parse(responseText);
@@ -158,7 +162,7 @@ function readTitle(url) {
     r.setRequestHeader("Api-User-Agent", "saaadkhan23@yahoo.ca");
     U.addHandler(r, "load", function () {
         if (r.readyState === 4) {
-            processTitles(r.responseText);
+            processTitles(r.responseText,url);
         }
     });
     r.send(null);
@@ -169,21 +173,24 @@ function getExtractPictures(titles) {
         readTitle("https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + titles[i]);
     }
 
-    var results = U.$("results");
+   /* var results = U.$("results");
     var date = U.$("date").value;
-    console.log(results.childNodes[0].innerHTML);
+    var x = (results.childNodes[0]);
+    console.log("results.childNodes[0].innerHTML.length --->")
+    console.log(x);
     
+
     var resultsArray = [];
     for (var i = 0; i < results.childNodes.length; i++) {
-        resultsArray[i] = results.childNodes[i].innerHTML;
-        //console.log(resultsArray[i]);
+        console.log(U.$("results").childNodes[0].innerHTML);
     }
-    
-    var expire = new Date();
+
+    /*var expire = new Date();
     expire.setDate(expire.getDate() + 1);
     var dateInUTCFormat = expire.toUTCString();
     console.log("making cookies");
     document.cookie = date + "=" + encodeURIComponent(resultsArray) + ";expires=" + dateInUTCFormat;
+    */
 }
 function populateIndex(titles, numViews) {
     var results = U.$("results");
@@ -255,20 +262,19 @@ function submitData() {
         }
     }
     else {
-        U.$("date").style.color = "red";
+        U.$("date").style.borderColor = "red";
     }
 }
-function processText(responseText) {
+function processText(responseText,url) {
     var text = JSON.parse(responseText);
     var numArt = U.$("numArt").value;
     var topViewed = [];
     var numViews = [];
-
     for (var i = 0; i < numArt; i++) {
         if (
             text.items[0].articles[i].article.indexOf("Main_Page") === -1 &&
             text.items[0].articles[i].article.indexOf("Accueil_principal") === -1 &&
-            text.items[0].articles[i].article.indexOf(".php") === -1 &&
+            text.items[0].articles[i].article.indexOf(".") === -1 &&
             text.items[0].articles[i].article.indexOf("Special") === -1 &&
             text.items[0].articles[i].article.indexOf("Spécial") === -1 &&
             text.items[0].articles[i].article.indexOf("Sp?cial") === -1) {
@@ -279,6 +285,9 @@ function processText(responseText) {
             numArt++;
         }
     }
+    console.log(topViewed);
+    
+   // localStorage.setItem()
     topViewed = topViewed.filter(String);
     numViews = numViews.filter(String);
     populateIndex(topViewed, numViews);
