@@ -17,16 +17,23 @@ if (!document.addEventListener) {
     createDummyElements();
 }
 function removeSaved() {
-   console.log("removing"); 
     var data = U.$("mySaved");
-    data.innerHTML = '';    
+    data.innerHTML = '';
 }
-function checkmarkGen(title,isChecked) {
+function removefromsaved() {
+    var data = JSON.parse(localStorage.getItem("savedList"));
+    for (var i = 0; i < data.length; i++) {
+
+    }
+    localStorage.setItem("savedList", JSON.stringify(data));
+}
+function checkmarkGen(title, isChecked) {
     var checkbox = document.createElement('input');
     checkbox.type = "checkbox";
     checkbox.value = title;
     checkbox.id = title;
-    checkbox.checked=isChecked;
+    checkbox.checked = isChecked;
+    U.addHandler(checkbox, "click", removefromsaved)
     return checkbox;
 }
 function selectedTop() {
@@ -36,41 +43,7 @@ function selectedTop() {
     U.$("topContent").style.backgroundcolor = "grey";
 
 }
-function populateSave(link,title,imgSrc,extract) {
-    var results = U.$("mySaved");
-    var resultnode = document.createElement("div");
-    var titleContainer = document.createElement("p");
-    var anchor = document.createElement("a");
-    var viewContainer = document.createElement("p");
-    var titlenode = document.createTextNode(title);
-    anchor.setAttribute("href",link);
-    anchor.appendChild(titlenode);
-    titleContainer.appendChild(anchor);
-    resultnode.appendChild(titleContainer);
-    resultnode.appendChild(viewContainer);
-    resultnode.id = title.replace(/ /g,"_");
-    resultnode.appendChild(checkmarkGen(resultnode.id,true));
-    results.appendChild(resultnode);
-    var text = document.createElement("p");
-    var imgContainer = document.createElement("div");
-    var summarynode = document.createTextNode(extract);
-    if (imgSrc!== null) {
-        var img = document.createElement("img");
-        img.src = imgSrc;
-        imgContainer.appendChild(img);
-        text.appendChild(imgContainer);
-    }
-    text.appendChild(summarynode);
-    results.appendChild(text);
-}
-function selectedSaved() {
-    invisbleAll();
-    removeSaved();
-    U.$("savedContent").style.display = "block";
-    var parser;
-    var xmlDoc;
-    var text = JSON.parse(localStorage.getItem("savedList"));
-
+function parseText(text) {
     for (var i = 0; i < text.length; i++) {
         if (window.DOMParser) {
             parser = new DOMParser();
@@ -80,27 +53,66 @@ function selectedSaved() {
             xmlDoc.async = false;
             xmlDoc.loadXML(text[i]);
         }
+
         var link = xmlDoc.getElementsByTagName("a")[0].href;
         var title = xmlDoc.getElementsByTagName("a")[0].innerText;
-        var img = xmlDoc.getElementsByTagName("img")[0].src;
-        var extract = xmlDoc.getElementsByTagName("div")[0].nextSibling.textContent;
-        populateSave(link,title,img,extract)
+        var img = null;
+        var extract = xmlDoc.getElementsByTagName("p")[3].innerText;
+        if (xmlDoc.getElementsByTagName("img")[0] !== undefined) {
+            img = xmlDoc.getElementsByTagName("img")[0].src;
+        }
+        populateSave(link, title, img, extract);
     }
 }
-function notRepeat(data,resultHTML) {
-    var isRepeat
+function populateSave(link, title, imgSrc, extract) {
+    var results = U.$("mySaved");
+    var resultnode = document.createElement("div");
+    var titleContainer = document.createElement("p");
+    var anchor = document.createElement("a");
+    var viewContainer = document.createElement("p");
+    var titlenode = document.createTextNode(title);
+    var text = document.createElement("p");
+    var imgContainer = document.createElement("div");
+    var summarynode = document.createTextNode(extract);
+    anchor.setAttribute("href", link);
+    anchor.appendChild(titlenode);
+    titleContainer.appendChild(anchor);
+    resultnode.appendChild(titleContainer);
+    resultnode.appendChild(viewContainer);
+    resultnode.id = title.replace(/ /g, "_");
+    resultnode.appendChild(checkmarkGen(resultnode.id, true));
+    results.appendChild(resultnode);
+    if (imgSrc !== null) {
+        var img = document.createElement("img");
+        img.src = imgSrc;
+        imgContainer.appendChild(img);
+        text.appendChild(imgContainer);
+    }
+    text.appendChild(summarynode);
+    text.id = "extract";
+    results.appendChild(text);
+
+
+}
+function selectedSaved() {
+    invisbleAll();
+    removeSaved();
+    U.$("savedContent").style.display = "block";
+    var parser;
+    var xmlDoc;
+    var text = JSON.parse(localStorage.getItem("savedList"));
+    parseText(text);
+}
+function notRepeat(data, resultHTML) {
     for (let i = 0; i < data.length; i++) {
-        if (data[i] === resultHTML)
-        return false
+        if (data[i].split("</p>")[0] === resultHTML.split("</p>")[0])
+            return false
     }
     return true;
 }
 function savedData() {
-    console.log("saving");
     var results = U.$("results");
     var data = JSON.parse(localStorage.getItem("savedList"));
-    console.log(data);
-    
     for (var i = 0; i < results.childNodes.length; i++) {
         if (results.childNodes[i].childNodes[2].checked && notRepeat(data, results.childNodes[i].innerHTML)) {
             data.push(results.childNodes[i].innerHTML);
@@ -120,13 +132,14 @@ function invisbleAll() {
     }
 }
 function removeData() {
-    var data = U.$("mySaved");
+    var data = U.$("results");
     data.innerHTML = '';
 }
 function processTitles(responseText) {
     var pageInfo = JSON.parse(responseText);
     var result = document.createElement("p");
     var imgContainer = document.createElement("div");
+    var text = document.createElement("p")
     var summarynode = document.createTextNode(pageInfo.extract);
     var target = U.$(pageInfo.titles.canonical);
     if (pageInfo.thumbnail !== undefined) {
@@ -135,7 +148,8 @@ function processTitles(responseText) {
         imgContainer.appendChild(img);
         result.appendChild(imgContainer);
     }
-    result.appendChild(summarynode);
+    text.appendChild(summarynode)
+    result.appendChild(text);
     target.appendChild(result);
 }
 function readTitle(url) {
@@ -154,6 +168,22 @@ function getExtractPictures(titles) {
     for (var i = 0; i < titles.length; i++) {
         readTitle("https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + titles[i]);
     }
+
+    var results = U.$("results");
+    var date = U.$("date").value;
+    console.log(results.childNodes[0].innerHTML);
+    
+    var resultsArray = [];
+    for (var i = 0; i < results.childNodes.length; i++) {
+        resultsArray[i] = results.childNodes[i].innerHTML;
+        //console.log(resultsArray[i]);
+    }
+    
+    var expire = new Date();
+    expire.setDate(expire.getDate() + 1);
+    var dateInUTCFormat = expire.toUTCString();
+    console.log("making cookies");
+    document.cookie = date + "=" + encodeURIComponent(resultsArray) + ";expires=" + dateInUTCFormat;
 }
 function populateIndex(titles, numViews) {
     var results = U.$("results");
@@ -172,7 +202,7 @@ function populateIndex(titles, numViews) {
         resultnode.appendChild(titleContainer);
         resultnode.appendChild(viewContainer);
         resultnode.id = titles[i];
-        resultnode.appendChild(checkmarkGen(titles[i],false));
+        resultnode.appendChild(checkmarkGen(titles[i], false));
         results.appendChild(resultnode);
     }
     console.log("done");
@@ -185,17 +215,46 @@ function dateIsValid(testDate) {
     else
         return true;
 }
+function checkcookies(submitDate) {
+    var cookies = document.cookie.split(";");
+    var listCookies = [];
+    for (var i = 0; i < cookies.length; i++) {
+        listCookies[i] = cookies[i].split("=");
+        if (listCookies[i][0] !== submitDate) {
+            return true;
+        }
+    }
+    return false;
+}
+function retainFromCache(date) {
+    var cookies = document.cookie.split(";");
+    var listCookies = [];
+    var myCookie;
+    for (var i = 0; i < cookies.length; i++) {
+        listCookies[i] = cookies[i].split("=");
+        if (listCookies[i][0] !== date) {
+            myCookie = decodeURIComponent(listCookies[i][1]);
+        }
+    }
+    console.log(myCookie);
+}
 function submitData() {
     removeData();
+    console.log("submitting");
     var date = U.$("date").value;
     if (dateIsValid(date)) {
         U.$("date").style.color = "black";
         var numArt = U.$("numArt");
         var language = U.$("langSelect").value;
-        readFile("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2], numArt);
+        if (checkcookies(date)) {
+            console.log("api");
+            readFile("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2], numArt);
+        }
+        else {
+            retainFromCache(date);
+        }
     }
     else {
-        console.log("change to red");
         U.$("date").style.color = "red";
     }
 }
@@ -241,8 +300,7 @@ function defaultSearch() {
     var date = dateToString(g.yesturday);
     if (dateIsValid(date)) {
         U.$("date").value = date;
-        var language = U.$("langSelect").value;
-        readFile("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2], numArt);
+        submitData();
     }
 }
 function pad(number) {
@@ -263,7 +321,6 @@ function noScrollJumping() {
 
 }
 function main() {
-    console.log("start");
     var currentDate = new Date();
     g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 1));
     g.minDate = new Date();
