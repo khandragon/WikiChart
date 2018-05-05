@@ -23,9 +23,11 @@ function removeSaved() {
     }
 }
 function removefromsaved() {
-    var data = JSON.parse(localStorage.getItem("savedList"));
-    for (var i = 0; i < data.length; i++) {
+    var results = U.$("mySaved");
 
+    console.log(data);
+    for (var i = 0; i < data.length; i++) {
+        data.filter()
     }
     localStorage.setItem("savedList", JSON.stringify(data));
 }
@@ -35,46 +37,30 @@ function checkmarkGen(title, isChecked) {
     checkbox.value = title;
     checkbox.id = title;
     checkbox.checked = isChecked;
-    U.addHandler(checkbox, "click", removefromsaved)
+    if(isChecked === true){
+        U.addHandler(checkbox, "click", removefromsaved)
+    }
     return checkbox;
 }
 function selectedTop() {
     invisbleAll();
     removeSaved();
     U.$("topContent").style.display = "block";
-    U.$("topContent").style.backgroundcolor = "grey";
-
 }
-function parseText(text) {
-    for (var i = 0; i < text.length; i++) {
-        var parser;
-        var xmlDoc;
-        if (window.DOMParser) {
-            parser = new DOMParser();
-            xmlDoc = parser.parseFromString(text[i], "text/html");
-        } else {
-            xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
-            xmlDoc.async = false;
-            xmlDoc.loadXML(text[i]);
-        }
-
-        var link = xmlDoc.getElementsByTagName("a")[0].href;
-        var title = xmlDoc.getElementsByTagName("a")[0].innerText;
-        var img = null;
-        var extract = xmlDoc.getElementsByTagName("p")[3].innerText;
-        if (xmlDoc.getElementsByTagName("img")[0] !== undefined) {
-            img = xmlDoc.getElementsByTagName("img")[0].src;
-        }
-        populateSave(link, title, img, extract);
+function parseText(saveList) {
+    for(var i =0; i<saveList.length;i++){
+        console.log(saveList[i]);
+        populateSave(saveList[i].url, saveList[i].title, saveList[i].img, saveList[i].extract);
     }
-}
+   }
 function populateSave(link, title, imgSrc, extract) {
+    console.log(title);
     var results = U.$("mySaved");
     var resultnode = document.createElement("div");
     var titleContainer = document.createElement("p");
     var anchor = document.createElement("a");
     var viewContainer = document.createElement("p");
-    var titlenode = document.createTextNode(title);
+    var titlenode = document.createTextNode(title.replace(/_/g, ""));
     var text = document.createElement("p");
     var imgContainer = document.createElement("div");
     var summarynode = document.createTextNode(extract);
@@ -83,20 +69,20 @@ function populateSave(link, title, imgSrc, extract) {
     titleContainer.appendChild(anchor);
     resultnode.appendChild(titleContainer);
     resultnode.appendChild(viewContainer);
-    resultnode.id = title.replace(/ /g, "_");
+    resultnode.id = title;
     resultnode.appendChild(checkmarkGen(resultnode.id, true));
-    results.appendChild(resultnode);
     if (imgSrc !== null) {
         var img = document.createElement("img");
         img.src = imgSrc;
+        img.height = "326";
+        img.width = "220"
         imgContainer.appendChild(img);
         text.appendChild(imgContainer);
     }
     text.appendChild(summarynode);
     text.id = "extract";
-    results.appendChild(text);
-
-
+    resultnode.appendChild(text);
+    results.appendChild(resultnode);
 }
 function selectedSaved() {
     invisbleAll();
@@ -105,19 +91,13 @@ function selectedSaved() {
     var text = JSON.parse(localStorage.getItem("savedList"));
     parseText(text);
 }
-function notRepeat(data, resultHTML) {
-    for (let i = 0; i < data.length; i++) {
-        if (data[i].split("</p>")[0] === resultHTML.split("</p>")[0])
-            return false
-    }
-    return true;
-}
+
 function savedData() {
     var results = U.$("results");
     var data = JSON.parse(localStorage.getItem("savedList"));
-    for (var i = 0; i < results.childNodes.length; i++) {
-        if (results.childNodes[i].childNodes[2].checked && notRepeat(data, results.childNodes[i].innerHTML)) {
-            data.push(results.childNodes[i].innerHTML);
+   for (var i = 0; i < results.childNodes.length; i++) {
+        if (results.childNodes[i].childNodes[2].checked) {
+            data.push(JSON.parse(localStorage.getItem(results.children[i].id)));
         }
     }
     localStorage.setItem("savedList", JSON.stringify(data));
@@ -157,37 +137,40 @@ function createCache(pageInfo) {
     }
     localStorage.setItem(title, JSON.stringify(cache));
 }
+function addExtractPictures(title, extract, thumbnail) {
+    var result = document.createElement("p");
+    var imgContainer = document.createElement("div");
+    var text = document.createElement("p")
+    var summarynode = document.createTextNode(extract);
+    var target = U.$(title);
+    if (thumbnail !== null) {
+        var img = document.createElement("img");
+        img.src = thumbnail;
+        img.height = "326";
+        img.width = "220"
+        imgContainer.appendChild(img);
+        result.appendChild(imgContainer);
+    }
+    text.appendChild(summarynode)
+    result.appendChild(text);
+    target.appendChild(result);
+}
 function processTitles(responseText) {
     var pageInfo = JSON.parse(responseText);
     createCache(pageInfo);
-    if (U.$(pageInfo.titles.canonical) !== null) {
-        var result = document.createElement("p");
-        var imgContainer = document.createElement("div");
-        var text = document.createElement("p")
-        var summarynode = document.createTextNode(pageInfo.extract);
-        var target = U.$(pageInfo.titles.canonical);
-        if (pageInfo.thumbnail !== undefined) {
-            var img = document.createElement("img");
-            img.src = pageInfo.thumbnail.source;
-            imgContainer.appendChild(img);
-            result.appendChild(imgContainer);
+    if (pageInfo.thumbnail)
+        if (U.$(pageInfo.titles.canonical) !== null) {
+            addExtractPictures(pageInfo.titles.canonical, pageInfo.extract, pageInfo.thumbnail.source);
         }
-        text.appendChild(summarynode)
-        result.appendChild(text);
-        target.appendChild(result);
-    }
 }
-function createFromCache(title) {
-    var data = localStorage.getItem(title);
-    console.log("creating");
-}
+
 function readTitle(url) {
     var r = new XMLHttpRequest();
     r.open("GET", url, true);
     r.setRequestHeader("Api-User-Agent", "saaadkhan23@yahoo.ca");
     U.addHandler(r, "load", function () {
         if (r.readyState === 4) {
-            processTitles(r.responseText, url);
+            processTitles(r.responseText);
         }
     });
     r.send(null);
@@ -199,11 +182,14 @@ function TitleInCache(title) {
     }
     return true;
 }
+function createFromCache(title) {
+    var data = JSON.parse(localStorage.getItem(title));
+    addExtractPictures(data.title, data.extract, data.img)
+}
 
-function getExtractPictures(titles) {
+function getExtractPictures(titles, numArt) {
     var language = U.$("langSelect").value;
-    console.log(titles)
-    for (var i = 0; i < titles.length; i++) {
+    for (var i = 0; i < numArt; i++) {
         var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + titles[i];
         if (TitleInCache(titles[i])) {
             console.log("title in cache");
@@ -215,26 +201,24 @@ function getExtractPictures(titles) {
     }
 }
 
-function populateIndex(titles, numViews, numArt) {
+function populateIndex(title, numViews) {
     var results = U.$("results");
     var language = U.$("langSelect").value;
-    for (var i = 0; i < numArt; i++) {
-        var resultnode = document.createElement("div");
-        var titleContainer = document.createElement("p");
-        var anchor = document.createElement("a");
-        var viewContainer = document.createElement("p");
-        var titlenode = document.createTextNode((i + 1) + ": " + titles[i].replace(/_/g, " "));
-        anchor.setAttribute("href", "https://" + language + ".wikipedia.org/wiki/" + titles[i]);
-        var viewnode = document.createTextNode("  Number of Views: " + numViews[i]);
-        anchor.appendChild(titlenode);
-        titleContainer.appendChild(anchor);
-        viewContainer.appendChild(viewnode);
-        resultnode.appendChild(titleContainer);
-        resultnode.appendChild(viewContainer);
-        resultnode.id = titles[i];
-        resultnode.appendChild(checkmarkGen(titles[i], false));
-        results.appendChild(resultnode);
-    }
+    var resultnode = document.createElement("div");
+    var titleContainer = document.createElement("p");
+    var anchor = document.createElement("a");
+    var viewContainer = document.createElement("p");
+    var titlenode = document.createTextNode(title.replace(/_/g, " "));
+    anchor.setAttribute("href", "https://" + language + ".wikipedia.org/wiki/" + title);
+    var viewnode = document.createTextNode("  Number of Views: " + numViews);
+    anchor.appendChild(titlenode);
+    titleContainer.appendChild(anchor);
+    viewContainer.appendChild(viewnode);
+    resultnode.appendChild(titleContainer);
+    resultnode.appendChild(viewContainer);
+    resultnode.id = title;
+    resultnode.appendChild(checkmarkGen(title, false));
+    results.appendChild(resultnode);
     console.log("done");
 }
 function dateIsValid(testDate) {
@@ -245,8 +229,21 @@ function dateIsValid(testDate) {
     else
         return true;
 }
-function retainFromCache(date, numArt) {
-
+function retainFromCache(url, numArt) {
+    var top = JSON.parse(localStorage.getItem(url));
+    var language = U.$("langSelect").value;
+    for (var i = 0; i < numArt; i++) {
+        if (TitleInCache(top[i])) {
+            var data = JSON.parse(localStorage.getItem(top[i]));
+            populateIndex(data.title, data.views);
+        } else {
+            var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + top[i];
+            readTitle(url);
+            var data = JSON.parse(localStorage.getItem(top[i]));
+            console.log(data);
+        }
+    }
+    getExtractPictures(top, numArt);
 }
 function DateInCache(url) {
     if (localStorage.getItem(url) !== null) {
@@ -262,7 +259,7 @@ function submitData() {
     if (dateIsValid(date)) {
         U.$("date").style.borderColor = "black";
         var language = U.$("langSelect").value;
-        var numArt = U.$("numArt");
+        var numArt = U.$("numArt").value;
         var url = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2]);
         if (DateInCache(url)) {
             console.log("--->from api");
@@ -283,7 +280,6 @@ function processText(responseText, url) {
     var twenty = 20;
     var topViewed = [];
     var numViews = [];
-
     for (var i = 0; i < twenty; i++) {
         if (
             text.items[0].articles[i].article.indexOf("Main_Page") === -1 &&
@@ -311,8 +307,10 @@ function processText(responseText, url) {
         localStorage.setItem(topViewed[i], JSON.stringify(data));
     }
     localStorage.setItem(url, JSON.stringify(topViewed));
-    populateIndex(topViewed, numViews, numArt);
-    getExtractPictures(topViewed);
+    for (let i = 0; i < numArt; i++) {
+        populateIndex(topViewed[i], numViews[i], numArt);
+    }
+    getExtractPictures(topViewed, numArt);
 }
 function readFile(url) {
     var r = new XMLHttpRequest();
