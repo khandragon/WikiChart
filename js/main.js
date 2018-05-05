@@ -139,52 +139,47 @@ function removeData() {
         data.removeChild(data.firstChild);
     }
 }
-function createCookies(pageInfo) {
+function createCache(pageInfo) {
     var title = pageInfo.titles.canonical;
-    var url = "https://"+pageInfo.lang+".wikipedia.org/wiki/"+pageInfo.titles.canonical;
+    var url = "https://" + pageInfo.lang + ".wikipedia.org/wiki/" + pageInfo.titles.canonical;
     var extract = pageInfo.extract;
-    var imgSrc=null;
-    if(pageInfo.originalimage !== undefined){
+    var imgSrc = null;
+    if (pageInfo.originalimage !== undefined) {
         imgSrc = pageInfo.originalimage.source;
     }
-    var numViews = localStorage.getItem(title);
-    var cookie={
-        "title":title,
-        "url":url,
-        "views":numViews,
-        "img":imgSrc,
-        "extract":extract
+    var numViews = JSON.parse(localStorage.getItem(title)).views;
+    var cache = {
+        "title": title,
+        "url": url,
+        "views": numViews,
+        "img": imgSrc,
+        "extract": extract,
     }
-    localStorage.setItem(title,JSON.stringify(cookie));
-}
-function pageCookies(pageInfo) {
-    var date = U.$("date").value;
-    var language = U.$("langSelect").value;
-    var url = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + pageInfo.lang + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2]);
-    var cookieData = JSON.parse(localStorage.getItem(url));
-    for (var i = 0; i < cookieData.length; i++) {
-        if (cookieData[i] !== pageInfo.titles.canonical) {
-            createCookies(pageInfo);
-        }
-    }
+    localStorage.setItem(title, JSON.stringify(cache));
 }
 function processTitles(responseText) {
     var pageInfo = JSON.parse(responseText);
-    pageCookies(pageInfo);
-    var result = document.createElement("p");
-    var imgContainer = document.createElement("div");
-    var text = document.createElement("p")
-    var summarynode = document.createTextNode(pageInfo.extract);
-    var target = U.$(pageInfo.titles.canonical);
-    if (pageInfo.thumbnail !== undefined) {
-        var img = document.createElement("img");
-        img.src = pageInfo.thumbnail.source;
-        imgContainer.appendChild(img);
-        result.appendChild(imgContainer);
+    createCache(pageInfo);
+    if (U.$(pageInfo.titles.canonical) !== null) {
+        var result = document.createElement("p");
+        var imgContainer = document.createElement("div");
+        var text = document.createElement("p")
+        var summarynode = document.createTextNode(pageInfo.extract);
+        var target = U.$(pageInfo.titles.canonical);
+        if (pageInfo.thumbnail !== undefined) {
+            var img = document.createElement("img");
+            img.src = pageInfo.thumbnail.source;
+            imgContainer.appendChild(img);
+            result.appendChild(imgContainer);
+        }
+        text.appendChild(summarynode)
+        result.appendChild(text);
+        target.appendChild(result);
     }
-    text.appendChild(summarynode)
-    result.appendChild(text);
-    target.appendChild(result);
+}
+function createFromCache(title) {
+    var data = localStorage.getItem(title);
+    console.log("creating");
 }
 function readTitle(url) {
     var r = new XMLHttpRequest();
@@ -197,16 +192,33 @@ function readTitle(url) {
     });
     r.send(null);
 }
+function TitleInCache(title) {
+    if (JSON.parse(localStorage.getItem(title)).extract === undefined) {
+        console.log("undefined");
+        return false;
+    }
+    return true;
+}
+
 function getExtractPictures(titles) {
     var language = U.$("langSelect").value;
+    console.log(titles)
     for (var i = 0; i < titles.length; i++) {
-        readTitle("https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + titles[i]);
+        var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + titles[i];
+        if (TitleInCache(titles[i])) {
+            console.log("title in cache");
+            createFromCache(titles[i]);
+        } else {
+            console.log("title not in cache");
+            readTitle(url)
+        }
     }
 }
-function populateIndex(titles, numViews) {
+
+function populateIndex(titles, numViews, numArt) {
     var results = U.$("results");
     var language = U.$("langSelect").value;
-    for (var i = 0; i < titles.length; i++) {
+    for (var i = 0; i < numArt; i++) {
         var resultnode = document.createElement("div");
         var titleContainer = document.createElement("p");
         var anchor = document.createElement("a");
@@ -233,24 +245,16 @@ function dateIsValid(testDate) {
     else
         return true;
 }
-function checkcookies(url) {
-    for (let i = 0; i < localStorage.length; i++) {
-        localStorage[i];
+function retainFromCache(date, numArt) {
+
+}
+function DateInCache(url) {
+    if (localStorage.getItem(url) !== null) {
+        return false;
     }
     return true;
 }
-function retainFromCache(date) {
-    var cookies = document.cookie.split(";");
-    var listCookies = [];
-    var myCookie;
-    for (var i = 0; i < cookies.length; i++) {
-        listCookies[i] = cookies[i].split("=");
-        if (listCookies[i][0] !== date) {
-            myCookie = decodeURIComponent(listCookies[i][1]);
-        }
-    }
-    console.log(myCookie);
-}
+
 function submitData() {
     removeData();
     console.log("submitting");
@@ -260,12 +264,13 @@ function submitData() {
         var language = U.$("langSelect").value;
         var numArt = U.$("numArt");
         var url = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2]);
-        if (checkcookies(url)) {
-            console.log("api");
-            readFile(url, numArt);
+        if (DateInCache(url)) {
+            console.log("--->from api");
+            readFile(url);
         }
         else {
-            retainFromCache(date);
+            console.log("--->from cache");
+            retainFromCache(url, numArt);
         }
     }
     else {
@@ -275,38 +280,41 @@ function submitData() {
 function processText(responseText, url) {
     var text = JSON.parse(responseText);
     var numArt = U.$("numArt").value;
+    var twenty = 20;
     var topViewed = [];
     var numViews = [];
-    console.log(text);
 
-    for (var i = 0; i < numArt; i++) {
+    for (var i = 0; i < twenty; i++) {
         if (
             text.items[0].articles[i].article.indexOf("Main_Page") === -1 &&
             text.items[0].articles[i].article.indexOf("Accueil_principal") === -1 &&
             text.items[0].articles[i].article.indexOf(".") === -1 &&
             text.items[0].articles[i].article.indexOf("Special") === -1 &&
             text.items[0].articles[i].article.indexOf("Spécial") === -1 &&
+            text.items[0].articles[i].article.indexOf("Category") === -1 &&
+            text.items[0].articles[i].article.indexOf("Dns_rebinding") === -1 &&
+            text.items[0].articles[i].article.indexOf("DNS_rebinding") === -1 &&
             text.items[0].articles[i].article.indexOf("Sp?cial") === -1) {
             topViewed[i] = text.items[0].articles[i].article;
             numViews[i] = text.items[0].articles[i].views;
         }
         else {
-            numArt++;
+            twenty++;
         }
     }
-
     topViewed = topViewed.filter(String);
     numViews = numViews.filter(String);
-    var data = [];
     for (var i = 0; i < topViewed.length; i++) {
-        localStorage.setItem(topViewed[i],numViews[i]);
+        var data = {
+            "views": numViews[i],
+        };
+        localStorage.setItem(topViewed[i], JSON.stringify(data));
     }
     localStorage.setItem(url, JSON.stringify(topViewed));
-
-    populateIndex(topViewed, numViews);
+    populateIndex(topViewed, numViews, numArt);
     getExtractPictures(topViewed);
 }
-function readFile(url, numArt) {
+function readFile(url) {
     var r = new XMLHttpRequest();
     r.open("GET", url, true);
     r.setRequestHeader("Api-User-Agent", "saaadkhan23@yahoo.ca");
@@ -340,12 +348,14 @@ function defaultStore() {
     localStorage.setItem("savedList", JSON.stringify(data));
 }
 function noScrollJumping() {
-
+    U.$("topArt").href = "#!topContent";
+    U.$("savedArt").href = "#!savedContent";
+    U.$("chartArt").href = "#!hartContent";
 }
 function main() {
     var currentDate = new Date();
-    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 2));
-    g.minDate = new Date();
+    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 1));
+    g.tommorrow = new Date(currentDate.setDate(currentDate.getDate() + 1));
     defaultStore();
     defaultSearch();
     noScrollJumping();
