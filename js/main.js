@@ -24,12 +24,16 @@ function removeSaved() {
 }
 function removefromsaved() {
     var results = U.$("mySaved");
-
-    console.log(data);
-    for (var i = 0; i < data.length; i++) {
-        data.filter()
+    for (var i = 0; i < results.childNodes.length; i++) {
+        if (!results.childNodes[i].childNodes[2].checked) {
+            results.removeChild(results.childNodes[i]);
+        }
     }
-    localStorage.setItem("savedList", JSON.stringify(data));
+    var data = []
+    for (var i = 0; i < results.childNodes.length; i++) {
+        data[i]=localStorage.getItem(results.childNodes[i].id);
+    }
+    localStorage.setItem("savedList", (data));
 }
 function checkmarkGen(title, isChecked) {
     var checkbox = document.createElement('input');
@@ -37,7 +41,7 @@ function checkmarkGen(title, isChecked) {
     checkbox.value = title;
     checkbox.id = title;
     checkbox.checked = isChecked;
-    if(isChecked === true){
+    if (isChecked === true) {
         U.addHandler(checkbox, "click", removefromsaved)
     }
     return checkbox;
@@ -48,11 +52,11 @@ function selectedTop() {
     U.$("topContent").style.display = "block";
 }
 function parseText(saveList) {
-    for(var i =0; i<saveList.length;i++){
+    for (var i = 0; i < saveList.length; i++) {
         console.log(saveList[i]);
         populateSave(saveList[i].url, saveList[i].title, saveList[i].img, saveList[i].extract);
     }
-   }
+}
 function populateSave(link, title, imgSrc, extract) {
     console.log(title);
     var results = U.$("mySaved");
@@ -95,12 +99,13 @@ function selectedSaved() {
 function savedData() {
     var results = U.$("results");
     var data = JSON.parse(localStorage.getItem("savedList"));
-   for (var i = 0; i < results.childNodes.length; i++) {
+    for (var i = 0; i < results.childNodes.length; i++) {
         if (results.childNodes[i].childNodes[2].checked) {
             data.push(JSON.parse(localStorage.getItem(results.children[i].id)));
         }
     }
     localStorage.setItem("savedList", JSON.stringify(data));
+    selectedSaved();
 }
 function selectedChart() {
     invisbleAll();
@@ -352,7 +357,7 @@ function noScrollJumping() {
 }
 function main() {
     var currentDate = new Date();
-    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 1));
+    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 2));
     g.tommorrow = new Date(currentDate.setDate(currentDate.getDate() + 1));
     defaultStore();
     defaultSearch();
