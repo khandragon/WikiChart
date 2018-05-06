@@ -37,11 +37,12 @@ Add a `submission` branch -- this is the branch you will create a Merge Request 
 
 ## Views, Presentation
 
-The website should have 3 views:
+The website should have 4 views:
 
 1. Top Articles: this is the first thing visitors should see
 2. Saved Articles
 3. Activity Chart
+4. About: description of the project and references to libraries and APIs used.
 
 Feel free to use any CSS techniques you like as long as:
 
@@ -70,7 +71,8 @@ is disabled. (Otherwise, the tab title serves as the heading.)
 
 In addition, there should be a fixed-position link in the bottom-right corner of the
 screen that allows the user to jump to the top of the document. Make sure this link
-never obscures any other content.
+never obscures any other content and that it's always visible, even when the user scrolls
+to different parts of the page.
 
 ## Cross-Browser Behaviour, Graceful Degradation, Design
 
@@ -93,7 +95,7 @@ The appearance and behaviour does not have to be _exactly_ the same in old brows
 when JavaScript is disabled (that's impossible), but core functionality should be present:
 
 *   All essential content is displayed clearly, the layout can be different but it shouldn't be
-    broken and ugly.
+    broken or ugly.
 *   Features that absolutely depend on JavaScript should be replaced with informative messages
     indicating that JavaScript is required. (More details below.)
 
@@ -112,22 +114,28 @@ In addition, your app should:
     *   Use browser developer tools to emulate different resolutions.
     *   Test how your app adapts when you resize the browser window.
 
-### IE < 9
+### IE 8 and 9
 
-Your Ajax requests won't work in IE < 9 because they are cross-domain, so you should disable
+Your Ajax requests won't work in IE <= 9 because they are cross-domain. You will see an
+"Access Denied" error in the console when you run code that makes requests to the Mediawiki API.
+Therefore, you should disable
 certain features of your web app accordingly (basically anything that depends on wiki data) and display a message to the user.
 
-The simplest way to detect IE < 9 (and other very old browsers) in JavaScript is to check whether `addEventListener` is present.
+* The simplest way to detect IE 8 (and other very old browsers) in JavaScript is to check
+  whether `addEventListener` is present.
+* The simplest way to detect IE 9 in JavaScript is check whether the "range" type of input is
+  supported. See `U.supportsInput("range")` in `utilities.js`.
 
 Aside from not supporting newer JavaScript features, old browsers don't render HTML5 elements
 correctly or at all! We can use some CSS and JavaScript workarounds to compensate, but if the user
 also disables JavaScript in their settings, then your web app will look very broken. There's
 nothing you can do about this, it's okay. In summary: __if JavaScript is disabled on IE < 9, a large
-part of your website won't work and your HTML/CSS won't look good, which is fine__.
+part of your website won't work and your HTML/CSS won't look right, which is fine as long as the
+core information is still legible__.
 
-However, when JavaScript is enabled, all aspects of your app should work, even on IE 9. You
-should use the provided `utilities.js` to achieve this. In addition, for HTML5 support you need
-to take the following steps:
+However, when JavaScript is enabled, any feature that doesn't depend on the Mediawiki API, even on
+IE 9. You should use the provided `utilities.js` to achieve this. In addition, for HTML5 support
+you need to take the following steps:
 
 1.  Ensure that this function is called __before__ the DOM is loaded, but __only__ on old browsers:
 
@@ -172,15 +180,15 @@ Use the _progressive enhancement_ approach: start by implementing the core, mini
 functionality first and test that in old and new browsers at various screen resolutions.
 
 The minimal feature set is to display the essential text (and images, if any) clearly and to
-indicate whenever something is disabled because it requires JavaScript.
+indicate whenever something is disabled because it requires JavaScript or a particular browser
+feature.
 
 Once that works well, gradually add on more advanced features while regularly checking that
 the core features are not broken in older browsers.
 
 ## Functional Requirements
 
-I'm going to fill this in with more detail in the coming week. This
-section describes requirements. For information about the Wikimedia REST API, go to the next
+This section describes requirements. For information about the Wikimedia REST API, go to the next
 section.
 
 ### Top Articles
@@ -200,7 +208,8 @@ those articles aren't very interesting to show.
 
 The user should be able to interact with the Top Articles list in the following ways:
 
-* Choose a date to look up for top articles. The most recent date may be yesterday.
+* Choose a date to look up for top articles. The most recent date may be yesterday. The oldest date
+  may be July 2015.
 * Choose how many articles to show (5, 10, or 20). Use a dropdown menu.
 * Choose which language of wiki to search in (English, French). Use a dropdown menu.
 * Allow user to save the above preferences. Provide a Save button.
@@ -216,9 +225,7 @@ them next time they visit the web app. This list should show:
 * Article title, linked to article URL
 
 In the "Top Articles" view, show an empty star next to each article by default. (A star image of
-your choice will represent whether an article is "saved" or not. Behind the
-scenes, the star is actually an invisible checkbox input. In IE8, you can just show a regular
-checkbox, no star.)
+your choice will represent whether an article is "saved" or not.
 
 When the user clicks on the star, the star should be filled to indicate that the article is saved.
 
@@ -236,9 +243,25 @@ disrupt the layout of the page (should not cause other elements to move).
 
 ### Activity Chart
 
-Details to come! :) Rough idea is to use [chart.js](http://www.chartjs.org/docs/latest/getting-started/installation.html) to display
-a chart of views over time for a particular article: e.g. monthly views for the past year of the
-https://en.wikipedia.org/wiki/Tour_de_France article.
+(chart.js is only supported IE 10 and above. Display an informative message to the user if you
+the necessary features are not available.)
+
+The user should be able to search for an article title in English Wikipedia or French Wikipedia.
+If the article is found, display a bar chart of the monthly views for the past 12 months (not
+including the current month).
+
+There's an example further down of a mediawiki API request that provides a time series of article
+views.
+
+The chart should show:
+
+* labels like 2017-01, 2017-02 for each month on the x-axis.
+* a title for the data set like "Number of Views"
+
+Your task is to figure out how to transform the mediawiki API data into a format that chart.js
+will understand and create Chart object with the right options.
+
+More information about chart.js is provided in the section below.
 
 ## Wikimedia REST API
 
@@ -280,7 +303,28 @@ These examples should allow you to accomplish everything in the Functional Requi
 
 ## chart.js
 
-Info to come.
+To include chart.js in your code:
+
+1.  Go to the [installation](http://www.chartjs.org/docs/latest/getting-started/installation.html)
+    page and obtain a CDN link to a _minified_ and _bundled_ build of chart.js -- latest version.
+2.  Include this link in your HTML.
+
+If you are debugging, change the CDN link in your HTML to a _non-minified_ version so that it's
+easier to trace to the source of your issue.
+
+chart.js works by talking to a [canvas](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/canvas)
+element in your DOM and drawing/animating a chart in that element. You don't need to know any
+details about the canvas element to be able to use it for a chart.
+
+To use chart.js:
+
+1.  Add an empty canvas element to your HTML.
+2.  In your JavaScript, create a `Chart` object and pass your canvas element and options to its
+    constructor function.
+
+Follow the [basic usage example](http://www.chartjs.org/docs/latest/getting-started/usage.html)
+from the chart.js documentation -- it is quite similar to what your need to do.
+
 
 ## General Constraints
 

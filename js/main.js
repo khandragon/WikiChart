@@ -31,7 +31,7 @@ function removefromsaved() {
     }
     var data = []
     for (var i = 0; i < results.childNodes.length; i++) {
-        data[i]=localStorage.getItem(results.childNodes[i].id);
+        data[i] = localStorage.getItem(results.childNodes[i].id);
     }
     localStorage.setItem("savedList", (data));
 }
@@ -46,6 +46,11 @@ function checkmarkGen(title, isChecked) {
     }
     return checkbox;
 }
+function selectAbout() {
+    invisbleAll();
+    removeSaved();
+    U.$("about").style.display = "block";
+}
 function selectedTop() {
     invisbleAll();
     removeSaved();
@@ -53,12 +58,10 @@ function selectedTop() {
 }
 function parseText(saveList) {
     for (var i = 0; i < saveList.length; i++) {
-        console.log(saveList[i]);
         populateSave(saveList[i].url, saveList[i].title, saveList[i].img, saveList[i].extract);
     }
 }
 function populateSave(link, title, imgSrc, extract) {
-    console.log(title);
     var results = U.$("mySaved");
     var resultnode = document.createElement("div");
     var titleContainer = document.createElement("p");
@@ -129,8 +132,8 @@ function createCache(pageInfo) {
     var url = "https://" + pageInfo.lang + ".wikipedia.org/wiki/" + pageInfo.titles.canonical;
     var extract = pageInfo.extract;
     var imgSrc = null;
-    if (pageInfo.originalimage !== undefined) {
-        imgSrc = pageInfo.originalimage.source;
+    if (pageInfo.thumbnail !== undefined) {
+        imgSrc = pageInfo.thumbnail.source;
     }
     var numViews = JSON.parse(localStorage.getItem(title)).views;
     var cache = {
@@ -148,7 +151,7 @@ function addExtractPictures(title, extract, thumbnail) {
     var text = document.createElement("p")
     var summarynode = document.createTextNode(extract);
     var target = U.$(title);
-    if (thumbnail !== null) {
+    if (thumbnail !== undefined) {
         var img = document.createElement("img");
         img.src = thumbnail;
         img.height = "326";
@@ -162,11 +165,15 @@ function addExtractPictures(title, extract, thumbnail) {
 }
 function processTitles(responseText) {
     var pageInfo = JSON.parse(responseText);
+    console.log(pageInfo);
     createCache(pageInfo);
-    if (pageInfo.thumbnail)
-        if (U.$(pageInfo.titles.canonical) !== null) {
-            addExtractPictures(pageInfo.titles.canonical, pageInfo.extract, pageInfo.thumbnail.source);
-        }
+    if (!pageInfo.thumbnail) {
+        pageInfo.thumbnail = "null";
+        console.log(pageInfo);
+    }
+    if (U.$(pageInfo.titles.canonical) !== null) {
+        addExtractPictures(pageInfo.titles.canonical, pageInfo.extract, pageInfo.thumbnail.source);
+    }
 }
 
 function readTitle(url) {
@@ -182,7 +189,6 @@ function readTitle(url) {
 }
 function TitleInCache(title) {
     if (JSON.parse(localStorage.getItem(title)).extract === undefined) {
-        console.log("undefined");
         return false;
     }
     return true;
@@ -195,7 +201,7 @@ function createFromCache(title) {
 function getExtractPictures(titles, numArt) {
     var language = U.$("langSelect").value;
     for (var i = 0; i < numArt; i++) {
-        var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + titles[i];
+        var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + titles[i] + "?redirect=false";
         if (TitleInCache(titles[i])) {
             console.log("title in cache");
             createFromCache(titles[i]);
@@ -242,10 +248,9 @@ function retainFromCache(url, numArt) {
             var data = JSON.parse(localStorage.getItem(top[i]));
             populateIndex(data.title, data.views);
         } else {
-            var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + top[i];
+            var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + top[i]+ "?redirect=false";
             readTitle(url);
             var data = JSON.parse(localStorage.getItem(top[i]));
-            console.log(data);
         }
     }
     getExtractPictures(top, numArt);
@@ -293,6 +298,7 @@ function processText(responseText, url) {
             text.items[0].articles[i].article.indexOf("Special") === -1 &&
             text.items[0].articles[i].article.indexOf("Spécial") === -1 &&
             text.items[0].articles[i].article.indexOf("Category") === -1 &&
+            text.items[0].articles[i].article.indexOf("User") === -1 &&
             text.items[0].articles[i].article.indexOf("Dns_rebinding") === -1 &&
             text.items[0].articles[i].article.indexOf("DNS_rebinding") === -1 &&
             text.items[0].articles[i].article.indexOf("Sp?cial") === -1) {
@@ -357,7 +363,7 @@ function noScrollJumping() {
 }
 function main() {
     var currentDate = new Date();
-    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 2));
+    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 1));
     g.tommorrow = new Date(currentDate.setDate(currentDate.getDate() + 1));
     defaultStore();
     defaultSearch();
@@ -367,6 +373,7 @@ function main() {
     U.addHandler(U.$("topArt"), "click", selectedTop);
     U.addHandler(U.$("savedArt"), "click", selectedSaved);
     U.addHandler(U.$("chartArt"), "click", selectedChart);
+    U.addHandler(U.$("resourceTab"), "click", selectAbout);
     U.addHandler(U.$("submitBtn"), "click", submitData);
     U.addHandler(U.$("saveBtn"), "click", savedData);
 }
