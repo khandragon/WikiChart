@@ -91,6 +91,7 @@ function savedData() {
     var data = JSON.parse(localStorage.getItem("savedList"));
     for (var i = 0; i < results.childNodes.length; i++) {
         if (results.childNodes[i].childNodes[2].checked) {
+            console.log(data);
             if(!data.includes(results.childNodes[i].id)){
                 data.push(JSON.parse(localStorage.getItem(results.children[i].id)).title);
             }
