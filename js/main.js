@@ -46,16 +46,7 @@ function checkmarkGen(title, isChecked) {
     }
     return checkbox;
 }
-function selectAbout() {
-    invisbleAll();
-    removeSaved();
-    U.$("about").style.display = "block";
-}
-function selectedTop() {
-    invisbleAll();
-    removeSaved();
-    U.$("topContent").style.display = "block";
-}
+
 function parseText(saveList) {
     for (var i = 0; i < saveList.length; i++) {
         populateSave(saveList[i].url, saveList[i].title, saveList[i].img, saveList[i].extract);
@@ -78,7 +69,7 @@ function populateSave(link, title, imgSrc, extract) {
     resultnode.appendChild(viewContainer);
     resultnode.id = title;
     resultnode.appendChild(checkmarkGen(resultnode.id, true));
-    if (imgSrc !== null) {
+    if (imgSrc !== "null") {
         var img = document.createElement("img");
         img.src = imgSrc;
         img.height = "326";
@@ -91,13 +82,7 @@ function populateSave(link, title, imgSrc, extract) {
     resultnode.appendChild(text);
     results.appendChild(resultnode);
 }
-function selectedSaved() {
-    invisbleAll();
-    removeSaved();
-    U.$("savedContent").style.display = "block";
-    var text = JSON.parse(localStorage.getItem("savedList"));
-    parseText(text);
-}
+
 
 function savedData() {
     var results = U.$("results");
@@ -110,11 +95,7 @@ function savedData() {
     localStorage.setItem("savedList", JSON.stringify(data));
     selectedSaved();
 }
-function selectedChart() {
-    invisbleAll();
-    removeSaved();
-    U.$("chartContent").style.display = "block";
-}
+
 function invisbleAll() {
     var allContent = document.getElementsByTagName("section");
     for (var i = 0; i < allContent.length; i++) {
@@ -151,7 +132,7 @@ function addExtractPictures(title, extract, thumbnail) {
     var text = document.createElement("p")
     var summarynode = document.createTextNode(extract);
     var target = U.$(title);
-    if (thumbnail !== undefined) {
+    if (thumbnail) {
         var img = document.createElement("img");
         img.src = thumbnail;
         img.height = "326";
