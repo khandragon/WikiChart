@@ -1,3 +1,11 @@
+"use strict";
+
+function invisbleAll() {
+    var allContent = document.getElementsByTagName("section");
+    for (var i = 0; i < allContent.length; i++) {
+        allContent[i].style.display = "none";
+    }
+}
 function selectAbout() {
     invisbleAll();
     removeSaved();

@@ -24,6 +24,7 @@ function removeSaved() {
 }
 function removefromsaved() {
     var results = U.$("mySaved");
+    console.log(results.childNodes);
     for (var i = 0; i < results.childNodes.length; i++) {
         if (!results.childNodes[i].childNodes[2].checked) {
             results.removeChild(results.childNodes[i]);
@@ -49,7 +50,8 @@ function checkmarkGen(title, isChecked) {
 
 function parseText(saveList) {
     for (var i = 0; i < saveList.length; i++) {
-        populateSave(saveList[i].url, saveList[i].title, saveList[i].img, saveList[i].extract);
+        var data = JSON.parse(localStorage.getItem(saveList[i]))
+        populateSave(data.url, data.title, data.img, data.extract);
     }
 }
 function populateSave(link, title, imgSrc, extract) {
@@ -89,19 +91,14 @@ function savedData() {
     var data = JSON.parse(localStorage.getItem("savedList"));
     for (var i = 0; i < results.childNodes.length; i++) {
         if (results.childNodes[i].childNodes[2].checked) {
-            data.push(JSON.parse(localStorage.getItem(results.children[i].id)));
+            if(!data.includes(results.childNodes[i].id)){
+                data.push(JSON.parse(localStorage.getItem(results.children[i].id)).title);
+            }
         }
     }
     localStorage.setItem("savedList", JSON.stringify(data));
-    selectedSaved();
 }
 
-function invisbleAll() {
-    var allContent = document.getElementsByTagName("section");
-    for (var i = 0; i < allContent.length; i++) {
-        allContent[i].style.display = "none";
-    }
-}
 function removeData() {
     var data = U.$("results");
     while (data.firstChild) {
