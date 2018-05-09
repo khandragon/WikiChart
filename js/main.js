@@ -16,25 +16,25 @@ function createDummyElements() {
 if (!document.addEventListener) {
     createDummyElements();
 }
-function removeSaved() {
-    var data = U.$("mySaved");
-    while (data.firstChild) {
-        data.removeChild(data.firstChild);
-    }
-}
 function removefromsaved() {
     var results = U.$("mySaved");
     console.log(results.childNodes);
     for (var i = 0; i < results.childNodes.length; i++) {
         if (!results.childNodes[i].childNodes[2].checked) {
             results.removeChild(results.childNodes[i]);
+            if (results.childNodes.length === 0){
+                var notText = document.createElement("p");
+                notText.id="noText";
+                notText.innerText="No Articles Saved";
+                results.appendChild(notText);   
+            }
         }
     }
     var data = []
     for (var i = 0; i < results.childNodes.length; i++) {
         data[i] = localStorage.getItem(results.childNodes[i].id);
     }
-    localStorage.setItem("savedList", (data));
+    localStorage.setItem("savedList", data);
 }
 function checkmarkGen(title, isChecked) {
     var checkbox = document.createElement('input');
@@ -91,8 +91,7 @@ function savedData() {
     var data = JSON.parse(localStorage.getItem("savedList"));
     for (var i = 0; i < results.childNodes.length; i++) {
         if (results.childNodes[i].childNodes[2].checked) {
-            console.log(data);
-            if(!data.includes(results.childNodes[i].id)){
+            if (!data.includes(results.childNodes[i].id)) {
                 data.push(JSON.parse(localStorage.getItem(results.children[i].id)).title);
             }
         }
@@ -144,24 +143,22 @@ function addExtractPictures(title, extract, thumbnail) {
 }
 function processTitles(responseText) {
     var pageInfo = JSON.parse(responseText);
-    console.log(pageInfo);
     createCache(pageInfo);
     if (!pageInfo.thumbnail) {
         pageInfo.thumbnail = "null";
-        console.log(pageInfo);
     }
     if (U.$(pageInfo.titles.canonical) !== null) {
         addExtractPictures(pageInfo.titles.canonical, pageInfo.extract, pageInfo.thumbnail.source);
     }
 }
 
-function readTitle(url) {
+function readFile(url, cb) {
     var r = new XMLHttpRequest();
     r.open("GET", url, true);
     r.setRequestHeader("Api-User-Agent", "saaadkhan23@yahoo.ca");
     U.addHandler(r, "load", function () {
         if (r.readyState === 4) {
-            processTitles(r.responseText);
+            cb(r.responseText);
         }
     });
     r.send(null);
@@ -186,7 +183,7 @@ function getExtractPictures(titles, numArt) {
             createFromCache(titles[i]);
         } else {
             console.log("title not in cache");
-            readTitle(url)
+            readFile(url, processTitles);
         }
     }
 }
@@ -227,8 +224,8 @@ function retainFromCache(url, numArt) {
             var data = JSON.parse(localStorage.getItem(top[i]));
             populateIndex(data.title, data.views);
         } else {
-            var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + top[i]+ "?redirect=false";
-            readTitle(url);
+            var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + top[i] + "?redirect=false";
+            readFile(url, processTitles);
             var data = JSON.parse(localStorage.getItem(top[i]));
         }
     }
@@ -252,7 +249,7 @@ function submitData() {
         var url = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2]);
         if (DateInCache(url)) {
             console.log("--->from api");
-            readFile(url);
+            readFile(url, processText);
         }
         else {
             console.log("--->from cache");
@@ -269,6 +266,7 @@ function processText(responseText, url) {
     var twenty = 20;
     var topViewed = [];
     var numViews = [];
+    console.log(text.items[0].articles[13]);
     for (var i = 0; i < twenty; i++) {
         if (
             text.items[0].articles[i].article.indexOf("Main_Page") === -1 &&
@@ -302,17 +300,6 @@ function processText(responseText, url) {
     }
     getExtractPictures(topViewed, numArt);
 }
-function readFile(url) {
-    var r = new XMLHttpRequest();
-    r.open("GET", url, true);
-    r.setRequestHeader("Api-User-Agent", "saaadkhan23@yahoo.ca");
-    U.addHandler(r, "load", function () {
-        if (r.readyState === 4) {
-            processText(r.responseText, url);
-        }
-    });
-    r.send(null);
-}
 function defaultSearch() {
     console.log("default search");
     var date = dateToString(g.yesturday);
@@ -342,7 +329,7 @@ function noScrollJumping() {
 }
 function main() {
     var currentDate = new Date();
-    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 1));
+    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 2));
     g.tommorrow = new Date(currentDate.setDate(currentDate.getDate() + 1));
     defaultStore();
     defaultSearch();
