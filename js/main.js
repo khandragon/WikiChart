@@ -262,11 +262,11 @@ function submitData() {
 }
 function processText(responseText, url) {
     var text = JSON.parse(responseText);
+    console.log(text);
     var numArt = U.$("numArt").value;
     var twenty = 20;
     var topViewed = [];
     var numViews = [];
-    console.log(text.items[0].articles[13]);
     for (var i = 0; i < twenty; i++) {
         if (
             text.items[0].articles[i].article.indexOf("Main_Page") === -1 &&
@@ -329,7 +329,7 @@ function noScrollJumping() {
 }
 function main() {
     var currentDate = new Date();
-    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 2));
+    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 1));
     g.tommorrow = new Date(currentDate.setDate(currentDate.getDate() + 1));
     defaultStore();
     defaultSearch();
