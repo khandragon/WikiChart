@@ -18,15 +18,22 @@ if (!document.addEventListener) {
 }
 function removefromsaved() {
     var results = U.$("mySaved");
-    console.log(results.childNodes);
     for (var i = 0; i < results.childNodes.length; i++) {
         if (!results.childNodes[i].childNodes[2].checked) {
+            var removeCheck = results.childNodes[i].id;
             results.removeChild(results.childNodes[i]);
-            if (results.childNodes.length === 0){
+            if (results.childNodes.length === 0) {
                 var notText = document.createElement("p");
-                notText.id="noText";
-                notText.innerText="No Articles Saved";
-                results.appendChild(notText);   
+                notText.id = "noText";
+                notText.innerText = "No Articles Saved";
+                results.appendChild(notText);
+                defaultStore();
+            }
+            var topList = U.$("results");
+            for (var j = 0; j < topList.childNodes.length; j++) {
+                if (topList.childNodes[i].id === removeCheck) {
+                    topList.childNodes[i].childNodes[2].checked = false;
+                }
             }
         }
     }
@@ -88,6 +95,7 @@ function populateSave(link, title, imgSrc, extract) {
 
 function savedData() {
     var results = U.$("results");
+    console.log(localStorage.getItem("savedList"));
     var data = JSON.parse(localStorage.getItem("savedList"));
     for (var i = 0; i < results.childNodes.length; i++) {
         if (results.childNodes[i].childNodes[2].checked) {
@@ -262,7 +270,6 @@ function submitData() {
 }
 function processText(responseText, url) {
     var text = JSON.parse(responseText);
-    console.log(text);
     var numArt = U.$("numArt").value;
     var twenty = 20;
     var topViewed = [];
@@ -316,7 +323,7 @@ function pad(number) {
     return r;
 }
 function dateToString(date) {
-    return date.getUTCFullYear() + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate());
+    return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
 }
 function defaultStore() {
     var data = [];
