@@ -57,7 +57,7 @@ function checkmarkGen(title, isChecked) {
 
 function parseText(saveList) {
     for (var i = 0; i < saveList.length; i++) {
-        var data = JSON.parse(localStorage.getItem(saveList[i]))
+        var data = JSON.parse(localStorage.getItem(dateToString(g.yesturday)+saveList[i]));
         populateSave(data.url, data.title, data.img, data.extract);
     }
 }
@@ -95,12 +95,16 @@ function populateSave(link, title, imgSrc, extract) {
 
 function savedData() {
     var results = U.$("results");
-    console.log(localStorage.getItem("savedList"));
-    var data = JSON.parse(localStorage.getItem("savedList"));
+    var date = U.$("date").value;
+    var data = localStorage.getItem("savedList");
+    if (data === ""){
+        defaultStore();
+    }
+    data = JSON.parse(localStorage.getItem("savedList"));    
     for (var i = 0; i < results.childNodes.length; i++) {
         if (results.childNodes[i].childNodes[2].checked) {
             if (!data.includes(results.childNodes[i].id)) {
-                data.push(JSON.parse(localStorage.getItem(results.children[i].id)).title);
+                data.push(JSON.parse(localStorage.getItem(date+results.children[i].id)).title);
             }
         }
     }
@@ -113,7 +117,7 @@ function removeData() {
         data.removeChild(data.firstChild);
     }
 }
-function createCache(pageInfo) {
+function createCache(pageInfo,date) {
     var title = pageInfo.titles.canonical;
     var url = "https://" + pageInfo.lang + ".wikipedia.org/wiki/" + pageInfo.titles.canonical;
     var extract = pageInfo.extract;
@@ -121,7 +125,7 @@ function createCache(pageInfo) {
     if (pageInfo.thumbnail !== undefined) {
         imgSrc = pageInfo.thumbnail.source;
     }
-    var numViews = JSON.parse(localStorage.getItem(title)).views;
+    var numViews = JSON.parse(localStorage.getItem(date+title)).views;
     var cache = {
         "title": title,
         "url": url,
@@ -129,7 +133,7 @@ function createCache(pageInfo) {
         "img": imgSrc,
         "extract": extract,
     }
-    localStorage.setItem(title, JSON.stringify(cache));
+    localStorage.setItem(date+title, JSON.stringify(cache));
 }
 function addExtractPictures(title, extract, thumbnail) {
     var result = document.createElement("p");
@@ -149,9 +153,9 @@ function addExtractPictures(title, extract, thumbnail) {
     result.appendChild(text);
     target.appendChild(result);
 }
-function processTitles(responseText) {
+function processTitles(responseText, url, date) {
     var pageInfo = JSON.parse(responseText);
-    createCache(pageInfo);
+    createCache(pageInfo,date);
     if (!pageInfo.thumbnail) {
         pageInfo.thumbnail = "null";
     }
@@ -160,38 +164,38 @@ function processTitles(responseText) {
     }
 }
 
-function readFile(url, cb) {
+function readFile(url, cb, date) {
     var r = new XMLHttpRequest();
     r.open("GET", url, true);
     r.setRequestHeader("Api-User-Agent", "saaadkhan23@yahoo.ca");
     U.addHandler(r, "load", function () {
         if (r.readyState === 4) {
-            cb(r.responseText);
+            cb(r.responseText, url, date);
         }
     });
     r.send(null);
 }
-function TitleInCache(title) {
-    if (JSON.parse(localStorage.getItem(title)).extract === undefined) {
+function TitleInCache(title, date) {
+    if (JSON.parse(localStorage.getItem(date + title)).extract === undefined) {
         return false;
     }
     return true;
 }
-function createFromCache(title) {
-    var data = JSON.parse(localStorage.getItem(title));
+function createFromCache(title,date) {
+    var data = JSON.parse(localStorage.getItem(date+title));
     addExtractPictures(data.title, data.extract, data.img)
 }
 
-function getExtractPictures(titles, numArt) {
+function getExtractPictures(titles, numArt, date) {
     var language = U.$("langSelect").value;
     for (var i = 0; i < numArt; i++) {
         var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + titles[i] + "?redirect=false";
-        if (TitleInCache(titles[i])) {
+        if (TitleInCache(titles[i], date)) {    
             console.log("title in cache");
-            createFromCache(titles[i]);
+            createFromCache(titles[i], date);
         } else {
             console.log("title not in cache");
-            readFile(url, processTitles);
+            readFile(url, processTitles, date);
         }
     }
 }
@@ -224,20 +228,20 @@ function dateIsValid(testDate) {
     else
         return true;
 }
-function retainFromCache(url, numArt) {
+function retainFromCache(url, numArt, date) {
     var top = JSON.parse(localStorage.getItem(url));
     var language = U.$("langSelect").value;
     for (var i = 0; i < numArt; i++) {
-        if (TitleInCache(top[i])) {
-            var data = JSON.parse(localStorage.getItem(top[i]));
+        if (TitleInCache(top[i], date)) {
+            var data = JSON.parse(localStorage.getItem(date+top[i]));
             populateIndex(data.title, data.views);
         } else {
             var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + top[i] + "?redirect=false";
-            readFile(url, processTitles);
-            var data = JSON.parse(localStorage.getItem(top[i]));
+            readFile(url, processTitles, date);
+            var data = JSON.parse(localStorage.getItem(date + top[i]));
         }
     }
-    getExtractPictures(top, numArt);
+    getExtractPictures(top, numArt, date);
 }
 function DateInCache(url) {
     if (localStorage.getItem(url) !== null) {
@@ -256,19 +260,19 @@ function submitData() {
         var numArt = U.$("numArt").value;
         var url = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2]);
         if (DateInCache(url)) {
-            console.log("--->from api");
-            readFile(url, processText);
+            console.log("url--->from api");
+            readFile(url, processText, date);
         }
         else {
-            console.log("--->from cache");
-            retainFromCache(url, numArt);
+            console.log("url--->from cache");
+            retainFromCache(url, numArt, date);
         }
     }
     else {
         U.$("date").style.borderColor = "red";
     }
 }
-function processText(responseText, url) {
+function processText(responseText, url, date) {
     var text = JSON.parse(responseText);
     var numArt = U.$("numArt").value;
     var twenty = 20;
@@ -299,13 +303,13 @@ function processText(responseText, url) {
         var data = {
             "views": numViews[i],
         };
-        localStorage.setItem(topViewed[i], JSON.stringify(data));
+        localStorage.setItem(date + topViewed[i], JSON.stringify(data));
     }
     localStorage.setItem(url, JSON.stringify(topViewed));
     for (let i = 0; i < numArt; i++) {
         populateIndex(topViewed[i], numViews[i], numArt);
     }
-    getExtractPictures(topViewed, numArt);
+    getExtractPictures(topViewed, numArt, date);
 }
 function defaultSearch() {
     console.log("default search");
