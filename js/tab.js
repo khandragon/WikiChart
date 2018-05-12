@@ -27,7 +27,6 @@ function selectedSaved() {
     removeSaved();
     U.$("savedContent").style.display = "block";
     var text = JSON.parse(localStorage.getItem("savedList"));
-    console.log(text);//if(text ===)
     if (text.length === 0) {
         var result = U.$("mySaved");
         var notText = document.createElement("p");

@@ -57,7 +57,7 @@ function checkmarkGen(title, isChecked) {
 
 function parseText(saveList) {
     for (var i = 0; i < saveList.length; i++) {
-        var data = JSON.parse(localStorage.getItem(dateToString(g.yesturday) + saveList[i]));
+        var data = JSON.parse(localStorage.getItem(saveList[i].titleUrl));
         populateSave(data.url, data.title, data.img, data.extract);
     }
 }
@@ -78,7 +78,7 @@ function populateSave(link, title, imgSrc, extract) {
     resultnode.appendChild(viewContainer);
     resultnode.id = title;
     resultnode.appendChild(checkmarkGen(resultnode.id, true));
-    if (imgSrc !== "null") {
+    if (imgSrc !== null) {
         var img = document.createElement("img");
         img.src = imgSrc;
         img.height = "326";
@@ -95,6 +95,7 @@ function populateSave(link, title, imgSrc, extract) {
 
 function savedData() {
     var results = U.$("results");
+    var lang = U.$("langSelect").value;
     var date = U.$("date").value;
     var data = localStorage.getItem("savedList");
     if (data === "") {
@@ -103,8 +104,10 @@ function savedData() {
     data = JSON.parse(localStorage.getItem("savedList"));
     for (var i = 0; i < results.childNodes.length; i++) {
         if (results.childNodes[i].childNodes[2].checked) {
-            if (!data.includes(results.childNodes[i].id)) {
-                data.push(JSON.parse(localStorage.getItem(date + results.children[i].id)).title);
+            var titleUrl = "https://" + lang + ".wikipedia.org/api/rest_v1/page/summary/" + results.childNodes[i].id + "?redirect=false";
+            console.log(titleUrl);
+            if (!data.includes(titleUrl)) {
+                data.push(JSON.parse(localStorage.getItem(titleUrl)));
             }
         }
     }
@@ -132,6 +135,7 @@ function createCache(pageInfo, date) {
         "lang": lang,
         "title": title,
         "url": url,
+        "titleUrl":titleUrl,
         "views": numViews,
         "img": imgSrc,
         "extract": extract,
