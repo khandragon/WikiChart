@@ -194,10 +194,8 @@ function getExtractPictures(titles, numArt, date) {
     for (var i = 0; i < numArt; i++) {
         var url = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + titles[i] + "?redirect=false";
         if (TitleInCache(url)) {
-            console.log("title in cache");
             createFromCache(url);
         } else {
-            console.log("title not in cache");
             readFile(url, processTitles, date);
         }
     }
@@ -236,12 +234,10 @@ function retainFromCache(url, numArt, date) {
     var language = U.$("langSelect").value;
     for (var i = 0; i < numArt; i++) {
     var titleUrl = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + top[i] + "?redirect=false";        
-        if (TitleInCache(titleUrl)) {
-            console.log("title in cache")
+        if (TitleInCache(titleUrl))     {
             var data = JSON.parse(localStorage.getItem(titleUrl));
             populateIndex(data.title, data.views);
         } else {
-            console.log("title not in cache")
             readFile(titleUrl, processTitles, date);
             var data = JSON.parse(localStorage.getItem(titleUrl));
         }
