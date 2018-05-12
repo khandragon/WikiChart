@@ -51,5 +51,12 @@ section{
     z-index: 2;
     padding: 1.5%;
     border-radius: 5%;
-    background-color: #c5c2c2;
+    background-color: #b1afaf;
+    opacity: 0.2;
+    filter: alpha(opacity=20);
+}
+
+#toTop:hover{
+    opacity: 1;
+    filter: alpha(opacity=100);
 }
