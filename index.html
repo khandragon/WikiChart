@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!--Saad Khan 1633839-->
+<!--http://sonic.dawsoncollege.qc.ca/~F16_1633839/-->
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <script src="./js/cookie.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+  <script src="./js/utilities.js"></script>
+  <script src="./js/polyfills.js"></script>
+  <script src="./js/tab.js"></script>
+  <script src="./js/chart.js"></script>
+  <script src="./js/main.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css?family=Roboto+Condensed');
+  </style>
+  <link rel="stylesheet" type="text/css" href="./styles/main.css">
+  <title>Saad's Project2</title>
+</head>
+
+<body>
+  <h1 id="title">Saad-pedia</h1>
+  <noscript>
+    <p>Javascipt is currently diabled, some functionality will be affected</p>
+  </noscript>
+  <div id="tab">
+    <a id="topArt" href="#topContent">Top Articles</a>
+    <a id="savedArt" href="#savedContent">Saved Articles</a>
+    <a id="chartArt" href="#chartContent">Activity Chart</a>
+    <a id="resourceTab" href="#about">About</a>
+  </div>
+  <div id="visitPopUp">Congradulations you've visited the site more than 10 times this week</div>
+  <div id="toTop"><a href="#title">TOP</a></div>
+  <section id="topContent">
+    Select Date
+    <input id="date" type="date"> Number of Articles
+    <select id="numArt">
+      <option value="5">5</option>
+      <option value="10" selected="selected">10</option>
+      <option value="15">15</option>
+      <option value="20">20</option>
+    </select>
+    Language
+    <select id="langSelect">
+      <option value="en">English</option>
+      <option value="fr">French</option>
+    </select>
+    <input type="submit" value="Submit" id="submitBtn">
+    <input type="submit" value="Save" id="saveBtn">
+    <div id="results"></div>
+  </section>
+
+  <section id="savedContent">
+    <div id="mySaved"></div>
+  </section>
+
+  <section id="chartContent">
+    Name of Articles:
+    <input id="chartTitle" type="text"> Language
+    <select id="chartLang">
+      <option value="en">English</option>
+      <option value="fr">French</option>
+    </select>
+    <input type="submit" value="Display" id="displayBtn">
+    <div id="myChart"></div>
+    </div>
+  </section>
+
+  <section id="about">section 4
+  </section>
+</body>
+
+</html>

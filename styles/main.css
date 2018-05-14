@@ -1,0 +1,66 @@
+article,aside,details,figcaption,figure,
+footer,header,hgroup,menu,nav,section {
+   display:block;
+}
+a{
+    text-decoration: none;
+    color:black;
+}
+#tab {
+	overflow: hidden;
+    background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+#tab a {
+    float: left;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
+}
+
+section{
+    padding: 1%;
+    background-color: #c5c2c2;
+}
+
+#results, #mySaved, #myChart{
+    padding: 1%;
+    margin: 2%;
+    background-color: white;
+}
+
+#toTop{
+    position: fixed;
+    font-size: 18px;
+    right: 90px;
+    bottom:90px;
+    z-index: 2;
+    padding: 1.5%;
+    border-radius: 5%;
+    background-color: #b1afaf;
+    opacity: 0.2;
+    filter: alpha(opacity=20);
+}
+#visitPopUp {
+    font-size: 18px;
+    right: 90px;
+    bottom:90px;
+    z-index: 2;
+    padding: 1.5%;
+    background-color: #c5c2c2;
+    display: none;
+}
+
+#toTop:hover{
+    opacity: 1;
+    filter: alpha(opacity=100);
+}
