@@ -346,6 +346,7 @@ function noScrollJumping() {
     U.$("chartArt").href = "#!hartContent";
 }
 function main() {
+    cookiePlus();
     var currentDate = new Date();
     g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 1));
     defaultStore();

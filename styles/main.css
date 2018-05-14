@@ -19,11 +19,6 @@ a{
     font-size: 17px;
 }
 
-/* Change background color of buttons on hover */
-#tab a:hover {
-    background-color: #c5c2c2;
-}
-
 
 /* Style the tab content */
 .tabcontent {
@@ -34,7 +29,7 @@ a{
 
 section{
     padding: 1%;
-    background-color: #f1f1f1;
+    background-color: #c5c2c2;
 }
 
 #results, #mySaved, #myChart{
@@ -54,6 +49,15 @@ section{
     background-color: #b1afaf;
     opacity: 0.2;
     filter: alpha(opacity=20);
+}
+#visitPopUp {
+    font-size: 18px;
+    right: 90px;
+    bottom:90px;
+    z-index: 2;
+    padding: 1.5%;
+    background-color: #c5c2c2;
+    display: none;
 }
 
 #toTop:hover{
