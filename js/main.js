@@ -578,9 +578,9 @@ function main() {
     cookiePlus();
     var currentDate = new Date();
     g.yesturday = new Date(currentDate.setDate(currentDate.getDate()-1));
-    removeOldCookies();
     defaultStore();
     defaultSearch();
+    removeOldCookies();
     noScrollJumping();
     invisbleAll();
     selectedTop();
