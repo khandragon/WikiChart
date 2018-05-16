@@ -19,7 +19,6 @@ if (!document.addEventListener) {
     createDummyElements();
 }
 
-
 /**
  * When a checkbox is clicked remove from the saved list and update storage
  * 
@@ -52,6 +51,13 @@ function removefromsaved() {
     localStorage.setItem("savedList", data);
 }
 
+/**
+ * Create a check box object and depending on assign it a a function depending on where it was created
+ * 
+ * @param {any} title title of the object we are applying checmark to, it also becomes id and value
+ * @param {any} isChecked depending if the value is true or not assign a function
+ * @returns a checkmark object to be appended
+ */
 function checkmarkGen(title, isChecked) {
     var checkbox = document.createElement('input');
     checkbox.type = "checkbox";
@@ -67,12 +73,26 @@ function checkmarkGen(title, isChecked) {
     return checkbox;
 }
 
+/**
+ * takes an array of titles from save, parses the data then using the parsed data populate the save tab
+ * 
+ * @param {any} saveList a list of the articles to get from cache
+ */
 function parseText(saveList) {
     for (var i = 0; i < saveList.length; i++) {
         var data = JSON.parse(localStorage.getItem(saveList[i].titleUrl));
         populateSave(data.url, data.title, data.img, data.extract);
     }
 }
+
+/**
+ * take valus and populate the save list
+ * 
+ * @param {any} link url link to wikipedia site
+ * @param {any} title title of the article
+ * @param {any} imgSrc img source from the wikipedia article
+ * @param {any} extract the text information from the wikipedia article
+ */
 function populateSave(link, title, imgSrc, extract) {
     var results = U.$("mySaved");
     var resultnode = document.createElement("div");
@@ -104,6 +124,12 @@ function populateSave(link, title, imgSrc, extract) {
     results.appendChild(resultnode);
 }
 
+/**
+ * checl an array for any double, soecifcly for the save list
+ * 
+ * @param {any} arr array filled with many values some of which may be doubles
+ * @returns the same array in the same order without the doubles
+ */
 function removeDoubles(arr) {
     var returnArr = [];
     var checked = {};
@@ -113,10 +139,14 @@ function removeDoubles(arr) {
             returnArr.push(arr[i]);
         }
     }
-    console.log(returnArr);
     return returnArr;
 }
 
+/**
+ * when the save btn is clicked or checkmark is added to an article
+ * add it to the savelist in localstorage, also remove any possible doubles in the save list
+ * 
+ */
 function savedData() {
     var results = U.$("results");
     var lang = U.$("langSelect").value;
@@ -136,13 +166,23 @@ function savedData() {
     localStorage.setItem("savedList", JSON.stringify(data));
 }
 
+/**
+ * when new data is queried remove the old data from the results tab
+ * 
+ */
 function removeData() {
     var data = U.$("results");
     while (data.firstChild) {
         data.removeChild(data.firstChild);
     }
 }
-function createCache(pageInfo, date) {
+
+/**
+ * takes the page information and put them into the local storage
+ * 
+ * @param {any} pageInfo the page information from the response text and 
+ */
+function createCache(pageInfo) {
     var lang = pageInfo.lang;
     var title = pageInfo.titles.canonical;
     var url = "https://" + pageInfo.lang + ".wikipedia.org/wiki/" + title;
@@ -166,6 +206,14 @@ function createCache(pageInfo, date) {
     }
     localStorage.setItem(titleUrl, JSON.stringify(cache));
 }
+
+/**
+ * takes parameters and ads them to the resutlts tab displaying the results from the query
+ * 
+ * @param {any} title title of articles
+ * @param {any} extract extract of wikipedia articles
+ * @param {any} thumbnail source of image in wikipedia article
+ */
 function addExtractPictures(title, extract, thumbnail) {
     var result = document.createElement("p");
     var imgContainer = document.createElement("div");
@@ -184,6 +232,14 @@ function addExtractPictures(title, extract, thumbnail) {
     result.appendChild(text);
     target.appendChild(result);
 }
+
+/**
+ * takes the response text and creates cache following which it it adds extract and images
+ * 
+ * @param {any} responseText results from the api request
+ * @param {any} url null value for reusibility 
+ * @param {any} date value of the date query to be sent to create cache
+ */
 function processTitles(responseText, url, date) {
     var pageInfo = JSON.parse(responseText);
     createCache(pageInfo, date);
@@ -195,6 +251,13 @@ function processTitles(responseText, url, date) {
     }
 }
 
+/**
+ * api request with a cb function
+ * 
+ * @param {any} url api url to get response text
+ * @param {any} cb a callback function to be with response text
+ * @param {any} date date of the query
+ */
 function readFile(url, cb, date) {
     var r = new XMLHttpRequest();
     r.open("GET", url, true);
@@ -206,17 +269,37 @@ function readFile(url, cb, date) {
     });
     r.send(null);
 }
+
+/**
+ * checks if title is in the cache
+ * 
+ * @param {any} url url of the object in cache
+ * @returns returns boolean
+ */
 function TitleInCache(url) {
     if (JSON.parse(localStorage.getItem(url)).extract === undefined) {
         return false;
     }
     return true;
 }
+
+/**
+ * taking the url retrieves data from local storage then appends the extract and image  
+ * 
+ * @param {any} url value in local storage
+ */
 function createFromCache(url) {
     var data = JSON.parse(localStorage.getItem(url));
     addExtractPictures(data.title, data.extract, data.img)
 }
 
+/**
+ * taking the title, searches local storage for a value or makes an api request to get the information missing from the cache
+ * 
+ * @param {any} titles array of titles from the top 20 list
+ * @param {any} numArt number of articles that should be displayed
+ * @param {any} date the date of the query
+ */
 function getExtractPictures(titles, numArt, date) {
     var language = U.$("langSelect").value;
     for (var i = 0; i < numArt; i++) {
@@ -229,6 +312,12 @@ function getExtractPictures(titles, numArt, date) {
     }
 }
 
+/**
+ * appends to the results the titles, number of views 
+ * 
+ * @param {any} title a single title of a a wiki article
+ * @param {any} numViews number of views for that article
+ */
 function populateIndex(title, numViews) {
     var results = U.$("results");
     var language = U.$("langSelect").value;
@@ -247,19 +336,39 @@ function populateIndex(title, numViews) {
     resultnode.id = title;
     resultnode.appendChild(checkmarkGen(title, false));
     results.appendChild(resultnode);
-    console.log("done");
 }
+
+/**
+ * Checks if date is valid  
+ * 
+ * @param {any} testDate date to be checked
+ * @returns returns wether or not the date is valid
+ */
 function dateIsValid(testDate) {
-    var date_regex = /^(19|20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|1\d|2\d|3[01])$/;
-    if ((!date_regex.test(testDate))
-        || g.currentDate <= new Date(testDate)
-        || g.minDate < 0
-    ) {
+    var date_regex = /^(201[5678])-(0[1-9]|1[0-2])-(0[1-9]|1\d|2\d|3[01])$/;
+    var minDate = new Date("2015-08-01");
+    var testDate = new Date(testDate);
+    var testDate = new Date(testDate.setDate(testDate.getDate()+1));
+    var currentDate= new Date();
+    if ((!date_regex.test(dateToString(testDate)))
+       || (currentDate < testDate)
+       || (minDate >= testDate)
+    ){
         return false;
-    }
-    else
+    }else{
         return true;
+    }
 }
+
+/**
+ * takes top results then checks wether or not the toplist url is exists then checks
+ * wether or not to create from cache or make a new request afterwards appends extract and image
+ * 
+ * 
+ * @param {any} url url of top results
+ * @param {any} numArt number of articles that the query requires
+ * @param {any} date the date of the query
+ */
 function retainFromCache(url, numArt, date) {
     var top = JSON.parse(localStorage.getItem(url));
     var language = U.$("langSelect").value;
@@ -275,6 +384,13 @@ function retainFromCache(url, numArt, date) {
     }
     getExtractPictures(top, numArt, date);
 }
+
+/**
+ * check if the toplist is in the cache
+ * 
+ * @param {any} url toplist url
+ * @returns returns boolean value
+ */
 function TopListinCache(url) {
     if (localStorage.getItem(url) !== null) {
         return false;
@@ -282,22 +398,26 @@ function TopListinCache(url) {
     return true;
 }
 
+/**
+ * when submit btn is clicked function removes original data,
+ * than takes and validates values from query then decides whether or not
+ * to retain from cache or to make a request 
+ * 
+ * if date is invalid however the border will be red
+ * 
+ */
 function submitData() {
     removeData();
-    console.log("submitting");
     var date = U.$("date").value;
-    console.log(date);
     if (dateIsValid(date)) {
         U.$("date").style.borderColor = "black";
         var language = U.$("langSelect").value;
         var numArt = U.$("numArt").value;
         var url = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/" + language + ".wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2]);
         if (TopListinCache(url)) {
-            console.log("url--->from api");
             readFile(url, processText, date);
         }
         else {
-            console.log("url--->from cache");
             retainFromCache(url, numArt, date);
         }
     }
@@ -305,6 +425,17 @@ function submitData() {
         U.$("date").style.borderColor = "red";
     }
 }
+
+/**
+ * takes response text which are a list of top articles along with the number of views
+ * then saves them along with their views followed by calling populate index
+ * which appends the title and the views to the results after which envokes the 
+ * method to add the extracts and images
+ * 
+ * @param {any} responseText value that the api returns
+ * @param {any} url url for top list
+ * @param {any} date of the query requested
+ */
 function processText(responseText, url, date) {
     var text = JSON.parse(responseText);
     var language = U.$("langSelect").value;
@@ -346,14 +477,28 @@ function processText(responseText, url, date) {
     }
     getExtractPictures(topViewed, numArt, date);
 }
+
+/**
+ * default search to be made when DOM loads up
+ * 
+ */
 function defaultSearch() {
-    console.log("default search");
     var date = dateToString(g.yesturday);
     if (dateIsValid(date)) {
         U.$("date").value = date;
         submitData();
     }
 }
+
+/**
+ * add padding to  number value
+ * 4 --> 04
+ * but 
+ * 10 -->10
+ * 
+ * @param {any} number 
+ * @returns 
+ */
 function pad(number) {
     var r = String(number);
     if (r.length === 1) {
@@ -361,26 +506,48 @@ function pad(number) {
     }
     return r;
 }
+
+/**
+ * takes Date object and turns it into a string of the following format:
+ * Ex: 2018-04-12 
+ * 
+ * 
+ * @param {any} date 
+ * @returns 
+ */
 function dateToString(date) {
     return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
 }
+
+/**
+ * by defaul stores an empty array into the local storage
+ * 
+ */
 function defaultStore() {
     var data = [];
     localStorage.setItem("savedList", JSON.stringify(data));
 }
+
+/**
+ * makes the hrefs in the tabs stop from jumping around the page
+ * 
+ */
 function noScrollJumping() {
     U.$("topArt").href = "#!topContent";
     U.$("savedArt").href = "#!savedContent";
     U.$("chartArt").href = "#!hartContent";
 }
 
+/**
+ * checks the local storage for any value in the local storage that have been expired
+ * 
+ */
 function removeOldCookies() {
     for (var key in localStorage) {
         if (JSON.parse(localStorage.getItem(key)) !== null) {
             if (JSON.parse(localStorage.getItem(key)).timestamp !== undefined) {
                 var timestamp = new Date(JSON.parse(localStorage.getItem(key)).timestamp);
                 var date = dateToString(timestamp);
-                console.log(date);    
                 var urlEn = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2]);
                 var urlFr = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/fr.wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2]);
                 if(key === urlEn||key === urlFr){
@@ -395,10 +562,22 @@ function removeOldCookies() {
     }
 }
 
+/**
+ * Main function does:
+ * function first addds 1 to the cookie checking number of visits,
+ * creates date objects to be used in he future,
+ * checks the local storage for any values to remove,
+ * stores the default value into the local storage,
+ * does a preliminary search,
+ * formats the tabs,
+ * followed by selecting the first tab,
+ * finally add handlers to tabs and the buttons
+ * 
+ */
 function main() {
     cookiePlus();
     var currentDate = new Date();
-    g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 1));
+    g.yesturday = new Date(currentDate.setDate(currentDate.getDate()-1));
     removeOldCookies();
     defaultStore();
     defaultSearch();
@@ -412,4 +591,6 @@ function main() {
     U.addHandler(U.$("submitBtn"), "click", submitData);
     U.addHandler(U.$("saveBtn"), "click", savedData);
 }
+
 U.ready(main);
+
