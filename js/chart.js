@@ -1,4 +1,10 @@
 "use strict";
+
+/**
+ * generate an array of all past months
+ * 
+ * @returns an array of past months
+ */
 function generateDates() {
     var today = new Date();
     var yearToday = today.getFullYear();
@@ -15,10 +21,26 @@ function generateDates() {
     }
     return pastMonths;
 }
+
+/**
+ * format titles so that spaces are replaced with underlines
+ * 
+ * @param {any} title title of wiki article with spaces
+ * @returns return article name without spaces
+ */
 function queryParse(title) {
     title = title.replace(/ /g, "_");
     return title;
 }
+
+/**
+ * take the proper input and look for the
+ * correct values in local storage before making a api request
+ * 
+ * @param {any} query title of selected article
+ * @param {any} lang the language of the search we want
+ * @param {any} dates past dates to be displayed
+ */
 function inputGraphData(query, lang, dates) {
     if (query !== "") {
         console.log("in" + query);
@@ -57,9 +79,15 @@ function inputGraphData(query, lang, dates) {
         }
     }
 }
+
+/**
+ * main function for charts, generate past months
+ * followed by adding handler
+ * then creating the graph
+ * 
+ */
 function chartMain() {
     var pastMonths = generateDates();
-    console.log(pastMonths);
     U.addHandler(U.$("displayBtn"), "click", function () {
         var query = U.$("chartTitle").value;
         var lang = U.$("chartLang").value;
