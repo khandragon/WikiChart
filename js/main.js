@@ -106,9 +106,9 @@ function populateSave(link, title, imgSrc, extract) {
 
 function removeDoubles(arr) {
     var returnArr = [];
-    var checked ={};
-    for (var i =0; i <arr.length;i++){
-        if(!(arr[i].title in checked)){
+    var checked = {};
+    for (var i = 0; i < arr.length; i++) {
+        if (!(arr[i].title in checked)) {
             checked[arr[i].title] = true;
             returnArr.push(arr[i]);
         }
@@ -132,7 +132,7 @@ function savedData() {
             data.push(JSON.parse(localStorage.getItem(titleUrl)));
         }
     }
-    data=removeDoubles(data);
+    data = removeDoubles(data);
     localStorage.setItem("savedList", JSON.stringify(data));
 }
 
@@ -152,6 +152,7 @@ function createCache(pageInfo, date) {
     if (pageInfo.thumbnail !== undefined) {
         imgSrc = pageInfo.thumbnail.source;
     }
+    var timestamp = dateToString(g.yesturday);
     var numViews = JSON.parse(localStorage.getItem(titleUrl)).views;
     var cache = {
         "lang": lang,
@@ -161,6 +162,7 @@ function createCache(pageInfo, date) {
         "views": numViews,
         "img": imgSrc,
         "extract": extract,
+        "timestamp": timestamp
     }
     localStorage.setItem(titleUrl, JSON.stringify(cache));
 }
@@ -284,6 +286,7 @@ function submitData() {
     removeData();
     console.log("submitting");
     var date = U.$("date").value;
+    console.log(date);
     if (dateIsValid(date)) {
         U.$("date").style.borderColor = "black";
         var language = U.$("langSelect").value;
@@ -370,10 +373,33 @@ function noScrollJumping() {
     U.$("savedArt").href = "#!savedContent";
     U.$("chartArt").href = "#!hartContent";
 }
+
+function removeOldCookies() {
+    for (var key in localStorage) {
+        if (JSON.parse(localStorage.getItem(key)) !== null) {
+            if (JSON.parse(localStorage.getItem(key)).timestamp !== undefined) {
+                var timestamp = new Date(JSON.parse(localStorage.getItem(key)).timestamp);
+                var date = dateToString(timestamp);
+                console.log(date);    
+                var urlEn = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2]);
+                var urlFr = ("https://wikimedia.org/api/rest_v1/metrics/pageviews/top/fr.wikipedia.org/all-access/" + date.split("-")[0] + "/" + date.split("-")[1] + "/" + date.split("-")[2]);
+                if(key === urlEn||key === urlFr){
+                    localStorage.removeItem(key);
+                }                
+                var today = new Date();
+                if (date < today){
+                    localStorage.removeItem(key);
+                }
+            }
+        }
+    }
+}
+
 function main() {
     cookiePlus();
     var currentDate = new Date();
     g.yesturday = new Date(currentDate.setDate(currentDate.getDate() - 1));
+    removeOldCookies();
     defaultStore();
     defaultSearch();
     noScrollJumping();
