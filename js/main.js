@@ -544,7 +544,7 @@ function noScrollJumping() {
  */
 function removeOldCookies() {
     for (var key in localStorage) {
-        if (JSON.parse(localStorage.getItem(key)) !== undefined) {
+        if (JSON.parse(localStorage.getItem(key)) !== null) {
             if (JSON.parse(localStorage.getItem(key)).timestamp !== undefined) {
                 var timestamp = new Date(JSON.parse(localStorage.getItem(key)).timestamp);
                 var date = dateToString(timestamp);
