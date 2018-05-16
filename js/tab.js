@@ -1,10 +1,20 @@
 "use strict";
+
+/**
+ * Remove all objects from the list of saved articles
+ * 
+ */
 function removeSaved() {
     var data = U.$("mySaved");
     while (data.firstChild) {
         data.removeChild(data.firstChild);
     }
 }
+
+/**
+ * hides all tab information andmakes the tab all the same color by defualt
+ * 
+ */
 function invisbleAll() {
     var allContent = document.getElementsByTagName("section");
     for (var i = 0; i < allContent.length; i++) {
@@ -15,6 +25,11 @@ function invisbleAll() {
     U.$("chartArt").style.backgroundColor = "#f1f1f1";
     U.$("resourceTab").style.backgroundColor = "#f1f1f1";
 }
+
+/**
+ * make everything invisble, remove saved then open About Tab
+ * 
+ */
 function selectAbout() {
     invisbleAll();
     removeSaved();
@@ -22,12 +37,23 @@ function selectAbout() {
     U.$("resourceTab").style.backgroundColor = "#c5c2c2";
 }
 
+/**
+  * make everything invisble, remove saved then open Top Article tab
+ * 
+ */
 function selectedTop() {
     invisbleAll();
     removeSaved();
     U.$("topArt").style.backgroundColor = "#c5c2c2";
     U.$("topContent").style.display = "block";
 }
+
+/**
+  * make everything invisble, remove saved then open articles
+  * then depending on wether or not list is empty it will then parse the
+  * save list and display or will show no articles saved
+ * 
+ */
 function selectedSaved() {
     invisbleAll();
     removeSaved();
@@ -44,6 +70,11 @@ function selectedSaved() {
         parseText(text);
     }
 }
+
+/**
+ * make everything invisble, remove saved then open About Tab
+ * 
+ */
 function selectedChart() {
     invisbleAll();
     removeSaved();

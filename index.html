@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--Saad Khan 1633839-->
-<!--http://sonic.dawsoncollege.qc.ca/~F16_1633839/-->
+<!--http://sonic.dawsoncollege.qc.ca/~F16_1633839/423P2-KhanS-->
 <html lang="en">
 
 <head>
@@ -8,7 +8,6 @@
   <script src="./js/cookie.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
   <script src="./js/utilities.js"></script>
-  <script src="./js/polyfills.js"></script>
   <script src="./js/tab.js"></script>
   <script src="./js/chart.js"></script>
   <script src="./js/main.js"></script>
@@ -24,14 +23,18 @@
   <noscript>
     <p>Javascipt is currently diabled, some functionality will be affected</p>
   </noscript>
+
   <div id="tab">
     <a id="topArt" href="#topContent">Top Articles</a>
     <a id="savedArt" href="#savedContent">Saved Articles</a>
     <a id="chartArt" href="#chartContent">Activity Chart</a>
     <a id="resourceTab" href="#about">About</a>
   </div>
+
   <div id="visitPopUp">Congradulations you've visited the site more than 10 times this week</div>
-  <div id="toTop"><a href="#title">TOP</a></div>
+  <div id="toTop">
+    <a href="#title">TOP</a>
+  </div>
   <section id="topContent">
     Select Date
     <input id="date" type="date"> Number of Articles
@@ -48,11 +51,16 @@
     </select>
     <input type="submit" value="Submit" id="submitBtn">
     <input type="submit" value="Save" id="saveBtn">
-    <div id="results"></div>
+    <div id="results">
+      <noscript>Sorry Javascipt is disabled and no information can be shown at the time</noscript>
+    </div>
   </section>
 
   <section id="savedContent">
-    <div id="mySaved"></div>
+    Saved Articles:
+    <div id="mySaved">
+      <noscript>Sorry Javascipt is disabled and no information can be shown at the time</noscript>
+    </div>
   </section>
 
   <section id="chartContent">
@@ -63,11 +71,34 @@
       <option value="fr">French</option>
     </select>
     <input type="submit" value="Display" id="displayBtn">
-    <div id="myChart"></div>
+    <div id="myChart">Due to lack of time this page is still underconstruction
+      <noscript>Sorry Javascipt is disabled and no information can be shown at the time</noscript>
+    </div>
     </div>
   </section>
 
-  <section id="about">section 4
+  <section id="about">About :
+    <div id="myAbout">
+      <p>The goal of this project is to use the
+        <a href="https://www.mediawiki.org/wiki/REST_API">
+          <u>Wikipedia Api</u>
+        </a> to highlight particularly popular Wikipedia articles and display some interesting data about them.
+      </p>
+      <p>The website has 4 tabs: </p>
+      <ol>
+        <li>Top Articles: this is the first thing visitors should see
+        </li>
+        <li>Saved Articles</li>
+        <li> Activity Chart</li>
+        <li>About: description of the project and references to libraries and APIs used.</li>
+      </ol>
+      <p>Some of the other Api's and references we used were: </p>
+      <ul>
+        <li><a href="https://wikimedia.org/api/rest_v1/#!/Pageviews_data/get_metrics_pageviews_top_project_access_year_month_day">Get the most viewed articles for a project</a></li>
+        <li><a href="https://en.wikipedia.org/api/rest_v1/#!/Page_content/get_page_summary_title">Get a text extract and thumb summary of a page</a></li>
+        <li><a href="https://wikimedia.org/api/rest_v1/#!/Pageviews_data/get_metrics_pageviews_per_article_project_access_agent_article_granularity_start_end">Get pageview counts for a page</a></li>
+      </ul>
+    </div>
   </section>
 </body>
 

@@ -32,7 +32,7 @@ section{
     background-color: #c5c2c2;
 }
 
-#results, #mySaved, #myChart{
+#results, #mySaved, #myChart, #myAbout{
     padding: 1%;
     margin: 2%;
     background-color: white;
