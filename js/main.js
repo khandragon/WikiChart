@@ -1,9 +1,10 @@
 "use strict";
+
 var g = {};
+
 /**
- * createDummyElements - creates sematic elements which are not supported by IE8
- *
- */
+ *  Teaches IE < 9 to recognize HTML5 elements. 
+*/
 function createDummyElements() {
     var semanticElements = [
         "article", "aside", "details", "figcaption", "figure",
@@ -13,9 +14,16 @@ function createDummyElements() {
         document.createElement(semanticElements[i]);
     }
 }
+
 if (!document.addEventListener) {
     createDummyElements();
 }
+
+
+/**
+ * When a checkbox is clicked remove from the saved list and update storage
+ * 
+ */
 function removefromsaved() {
     var results = U.$("mySaved");
     for (var i = 0; i < results.childNodes.length; i++) {
@@ -43,6 +51,7 @@ function removefromsaved() {
     }
     localStorage.setItem("savedList", data);
 }
+
 function checkmarkGen(title, isChecked) {
     var checkbox = document.createElement('input');
     checkbox.type = "checkbox";
@@ -51,7 +60,10 @@ function checkmarkGen(title, isChecked) {
     checkbox.checked = isChecked;
     if (isChecked === true) {
         U.addHandler(checkbox, "click", removefromsaved)
+    } else {
+        U.addHandler(checkbox, "click", savedData)
     }
+
     return checkbox;
 }
 
@@ -92,6 +104,18 @@ function populateSave(link, title, imgSrc, extract) {
     results.appendChild(resultnode);
 }
 
+function removeDoubles(arr) {
+    var returnArr = [];
+    var checked ={};
+    for (var i =0; i <arr.length;i++){
+        if(!(arr[i].title in checked)){
+            checked[arr[i].title] = true;
+            returnArr.push(arr[i]);
+        }
+    }
+    console.log(returnArr);
+    return returnArr;
+}
 
 function savedData() {
     var results = U.$("results");
@@ -105,12 +129,10 @@ function savedData() {
     for (var i = 0; i < results.childNodes.length; i++) {
         if (results.childNodes[i].childNodes[2].checked) {
             var titleUrl = "https://" + lang + ".wikipedia.org/api/rest_v1/page/summary/" + results.childNodes[i].id + "?redirect=false";
-            console.log(titleUrl);
-            if (!data.includes(titleUrl)) {
-                data.push(JSON.parse(localStorage.getItem(titleUrl)));
-            }
+            data.push(JSON.parse(localStorage.getItem(titleUrl)));
         }
     }
+    data=removeDoubles(data);
     localStorage.setItem("savedList", JSON.stringify(data));
 }
 
@@ -135,7 +157,7 @@ function createCache(pageInfo, date) {
         "lang": lang,
         "title": title,
         "url": url,
-        "titleUrl":titleUrl,
+        "titleUrl": titleUrl,
         "views": numViews,
         "img": imgSrc,
         "extract": extract,
@@ -227,7 +249,10 @@ function populateIndex(title, numViews) {
 }
 function dateIsValid(testDate) {
     var date_regex = /^(19|20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|1\d|2\d|3[01])$/;
-    if ((!date_regex.test(testDate)) || g.currentDate <= new Date(testDate) || g.minDate < 0) {
+    if ((!date_regex.test(testDate))
+        || g.currentDate <= new Date(testDate)
+        || g.minDate < 0
+    ) {
         return false;
     }
     else
@@ -237,8 +262,8 @@ function retainFromCache(url, numArt, date) {
     var top = JSON.parse(localStorage.getItem(url));
     var language = U.$("langSelect").value;
     for (var i = 0; i < numArt; i++) {
-    var titleUrl = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + top[i] + "?redirect=false";        
-        if (TitleInCache(titleUrl))     {
+        var titleUrl = "https://" + language + ".wikipedia.org/api/rest_v1/page/summary/" + top[i] + "?redirect=false";
+        if (TitleInCache(titleUrl)) {
             var data = JSON.parse(localStorage.getItem(titleUrl));
             populateIndex(data.title, data.views);
         } else {
@@ -313,7 +338,7 @@ function processText(responseText, url, date) {
         localStorage.setItem(titleUrl, JSON.stringify(data));
     }
     localStorage.setItem(url, JSON.stringify(topViewed));
-    for (let i = 0; i < numArt; i++) {
+    for (var i = 0; i < numArt; i++) {
         populateIndex(topViewed[i], numViews[i], numArt);
     }
     getExtractPictures(topViewed, numArt, date);
