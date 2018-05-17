@@ -1,9 +1,8 @@
 # <Your Name> Project 2: WikiChart
 
-* Sonic URL: <http://blah.blah>
-* GitLab URL: <http://blah.blah>
+* Sonic URL: <https://sonic.dawsoncollege.qc.ca/~F16_1633839/423P2-KhanS/>
+* GitLab URL: <http://js423-2018-project2.gitlab.io/423P2-KhanS/>
 
 ## Known Issues
 
-Describe any problems you encountered or bugs you're aware of.
-
+Acticvity Chart has a large bug where its not done
